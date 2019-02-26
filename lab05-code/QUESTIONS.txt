@@ -35,12 +35,25 @@ B
   files in the current directory? Describe briefly how these calls work
   together.
 
+  opendir(): opens a directory stream for the directory that corresponds to
+  the string name passed.
+
+  readdir(): returns a pointer to the next directory entry in the directory
+  pointed to by the passed DIR pointer. Returns NULL when there are no more
+  entries to read.
+
+  opendir() returns a DIR pointer for the directory that you want to access.
+  That pointer is passed to readdir(), which then stores every entry in that dir
+  into a dirent struct which can be used to read some information on that entry.
+
 
 C
 ~
 
   Identify the system call that `dirops.c' uses to find the sizes of
   files. Describe briefly how this call works.
+
+  stat() call takes
 
 
 D

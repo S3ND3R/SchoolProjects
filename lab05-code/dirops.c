@@ -16,7 +16,12 @@ int main(int argc, char *argv[]) {
   long long max_size = 0;
   char max_name[NAMELEN] = {};
 
-  DIR *dir = opendir(".");
+  //DIR *dir = opendir(".");
+  DIR *dir = opendir(".");  // testing different inputs for the dir name
+  if(dir == NULL) {
+    perror("I darn can't open the file");
+    exit(1);
+  }
   struct dirent *file = NULL;
   while( (file = readdir(dir)) != NULL){
     struct stat sb;

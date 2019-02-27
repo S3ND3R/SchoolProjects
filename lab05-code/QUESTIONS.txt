@@ -54,7 +54,7 @@ C
   files. Describe briefly how this call works.
 
   stat() call returns a stat structure that contains information about the file
-  passed to it, a file pointer, as the first argument. 
+  passed to it, a file pointer, as the first argument.
 
 
 D
@@ -67,12 +67,17 @@ D
   `----
   Modify this line so that the copied file is readable by the group as
   well as the user.
-
+  ,----
+  | mode_t perms = S_IRUSR | S_IWUSR |S_IRWXG;
+  `----
   /Optional challenge:/ Set the permissions to be identical to the
   original file. `stat()' is one way to find out the permissions for the
   original file.
-
-
+  ,----
+  | struct stat sb;
+  | stat(max_name, &sb);
+  | mode_t perms = sb.st_mode;
+  `----
 E
 ~
 
@@ -89,3 +94,13 @@ E
   file.txt.copy' command which will show the last 10 lines.
 
   Explain what is wrong with the loop and paste a fixed version below.
+
+  Read fails to read in the entire BUFSIZE amount of bytes from infd into
+  buf on the final call, so when write is called and assigned to read BUFSIZE
+  amount of bytes from buf into outfd it reads what ever bytes were not
+  overwritten in buf by the final read call.
+  ,----
+  |   while( (nbytes = read(infd, buf, BUFSIZE)) > 0){
+  |    write(outfd, buf, nbytes);
+  |   }
+  `----

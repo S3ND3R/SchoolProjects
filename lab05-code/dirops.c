@@ -52,7 +52,7 @@ int main(int argc, char *argv[]) {
   int outfd = open(copy_name, flags, perms);
   int nbytes;
   while( (nbytes = read(infd, buf, BUFSIZE)) > 0){
-    write(outfd, buf, BUFSIZE);
+    write(outfd, buf, nbytes);
   }
   printf("Copy complete\n");
   close(infd);

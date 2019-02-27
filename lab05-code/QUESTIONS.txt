@@ -53,7 +53,8 @@ C
   Identify the system call that `dirops.c' uses to find the sizes of
   files. Describe briefly how this call works.
 
-  stat() call takes
+  stat() call returns a stat structure that contains information about the file
+  passed to it, a file pointer, as the first argument. 
 
 
 D

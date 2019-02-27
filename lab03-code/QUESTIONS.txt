@@ -1,0 +1,319 @@
+                           __________________
+
+                            LAB 03 QUESTIONS
+                           __________________
+
+
+- Name: Warren Weber
+- NetID: weber767
+
+Answer the questions below according to the lab specification. Write
+your answers directly in this text file and submit it to complete Lab01.
+
+
+PROBLEM 1 `wait_fork.c'
+=======================
+
+  The C file `wait-loop.c'. It implements a primitive interactive loop
+  asking a user to type things while a child process runs in the
+  background. By default, the provided `sleep_print.c' program is used
+  which creates a delay before the program finishes. Make sure to
+  compile it then compile `wait-loop.c' and experiment with its
+  behavior.
+
+  Here is a brief demo.
+  ,----
+  | > gcc -o sleep_print sleep_print.c
+  | > gcc wait-loop.c
+  | > a.out
+  | Type text then press enter to check on child:
+  | hello there
+  | Entered text: 'hello there'
+  | Waiting
+  | CHILD: Awake and Done
+  | CHILD FINISHED:
+  |
+  | Type text then press enter to check on child:
+  | what?
+  | Entered text: 'what?'
+  | Waiting
+  | Child not finished: wait returned -1
+  |
+  | Type text then press enter to check on child:
+  | stop
+  | Entered text: 'stop'
+  | Waiting
+  | Child not finished: wait returned -1
+  |
+  | Type text then press enter to check on child:
+  |   Ctrl-c
+  | >
+  `----
+
+
+A
+~
+
+  Alter the code so that when the child has completed execution, the
+  program breaks out of the loop and the program ends normally. Paste in
+  the code you used for this.
+
+    while(1){
+      printf("Type text then press enter to check on child:\n");
+      char buffer[1024];
+      char *input = fgets(buffer,1024,stdin);
+      input[strlen(input)-1] = '\0'; // Eliminate newline in buffer
+      printf("Entered text: '%s'\n",input);
+
+      printf("Waiting\n");
+      int status;
+      pid_t pid = waitpid(child_pid, &status, 0);
+      if(pid == child_pid){
+        printf("CHILD FINISHED: ");
+        printf("\n");
+        break;
+      }
+      else{
+        printf("Child not finished: wait returned %d\n",pid);
+      }
+      printf("\n");
+    }
+
+B
+~
+
+  Adjust the code so that the exit status of the child process is
+  printed when it finishes. Make sure to use the macros
+  `WIFEXITED(status)' and `WEXITSTATUS(status)' to deal with the
+  `status' set by `waitpid()'.  Paste the code you added for your
+  answer.
+
+  if(pid == child_pid && WIFEXITED(status)){
+    printf("CHILD FINISHED WITH EXIT STATUS: %d", WEXITSTATUS(status));
+    printf("\n");
+    break;
+  }
+
+C
+~
+
+  Make changes so that if the user types in the string `quit', the
+  program exits immediately without waiting further for the
+  child. Example:
+  ,----
+  | > a.out
+  | Type text then press enter to check on child:
+  | quit
+  | Entered text: 'quit'
+  | Quitting
+  | Exiting wait_loop
+  | > CHILD: Awake and Done
+  `----
+  Note that the child eventually prints output to the screen which is
+  fine.
+
+  You will need to check the user input using the `strncmp()'
+  function. Do some research on this function as it will prove generally
+  useful.
+
+  Paste the code you used below.
+
+  if(strncmp(input,"quit", strlen(input)) == 0){
+    printf("QUITTING\n");
+    break;
+  }
+
+D
+~
+
+  The current call to `waitpid()' blocks, pausing execution of the
+  parent process until the child finishes. Look up the option to pass to
+  `waitpid()' that will allow it to do a non-blocking wait which returns
+  immediately if the child is not finished. A sample behavior is below.
+  ,----
+  | > a.out
+  | Type text then press enter to check on child:
+  | stuff
+  | Entered text: 'stuff'
+  | Waiting
+  | Child not finished: wait returned 0
+  |
+  | Type text then press enter to check on child:
+  | more stuff
+  | Entered text: 'more stuff'
+  | Waiting
+  | Child not finished: wait returned 0
+  |
+  | Type text then press enter to check on child:
+  | CHILD: Awake and Done
+  | Looks like you're finally up
+  | Entered text: 'Looks like you're finally up'
+  | Waiting
+  | CHILD FINISHED: Exit status 5
+  | Exiting wait_loop
+  | >
+  `----
+
+  Paste your entire code for `wait_loop.c' below.
+
+  #include <stdlib.h>
+  #include <stdio.h>
+  #include <unistd.h>
+  #include <sys/wait.h>
+  #include <string.h>
+
+  int main(void) {
+    // Make sure to compile sleep_print first:
+    // gcc -o sleep_print sleep_print.c
+    char *child_argv[] = {"./sleep_print","5","CHILD: Awake and Done",NULL};
+    pid_t child_pid = fork();
+    if(child_pid == 0){
+      execvp(child_argv[0],child_argv);
+      perror("errno indicates");
+      printf("Couldn't run '%s': is it compiled??\n",child_argv[0]);
+      exit(1);
+    }
+
+    while(1){
+      printf("Type text then press enter to check on child:\n");
+      char buffer[1024];
+      char *input = fgets(buffer,1024,stdin);
+      input[strlen(input)-1] = '\0'; // Eliminate newline in buffer
+      printf("Entered text: '%s'\n",input);
+      if(strncmp(input,"quit", strlen(input)) == 0){
+        printf("QUITTING\n");
+        break;
+      }
+      printf("Waiting\n");
+      int status;
+      pid_t pid = waitpid(child_pid, &status, WNOHANG);
+      if(pid == child_pid && WIFEXITED(status)){
+        printf("CHILD FINISHED WITH EXIT STATUS: %d", WEXITSTATUS(status));
+        printf("\n");
+        break;
+      }
+      else{
+        printf("Child not finished: wait returned %d\n",pid);
+      }
+      printf("\n");
+    }
+    printf("Exiting wait-loop\n");
+    return 0;
+  }
+
+PROBLEM 2 `parent_listen.c'
+===========================
+
+  `parent_listen.c' demonstrates listening of a parent to output that is
+  write()'n to a pipe. Examine its contents carefully.
+
+
+A
+~
+
+  Compile and run the program in `parent_listen.c'. Show it's output
+  below.
+
+  Parent creating child process
+  Child wrote 17 bytes
+  Parent read 17 bytes
+  Child said: 'Send $$$ please!'
+
+B
+~
+
+  Consider the call to `pipe()'. Do some research on Unix pipes to
+  figure out what a pipe does and explain in a few sentences.
+
+  The pipe() call connects two processes in UNIX. The pipe allows the two
+  processes to pass the stdin and stdout to one another by accessing the first
+  two file descriptors in a integer array.
+
+
+C
+~
+
+  Observe the calls to `read()' and `write()'. Their meaning should be
+  self-evident (read and write data) but the parameters to these
+  functions are interesting. Do some reading and explain the 3
+  parameters to each of them. Also explain their return value.
+
+  write() parameters:
+    1. takes in the input file, which can be the stdin or a file
+    2. is the pointer to a char array that will be written to the first
+    parameter
+    3. is the number of characters to be read, which may or may not be all read
+    if the EOF is reached first
+  write will return the number of characters that were written
+
+  read() parameters:
+    1. takes in the output file, which can be the stdout or a file
+    2. is the pointer to an array that will be read from the first parameter
+    3. is the size of the buffer
+  read will return the number of characters that were read
+
+
+D
+~
+
+  If you run the program a number of times, you may see output in
+  different orders: the child may report writing data before the parent
+  has read it.  Adjust the position of the wait() call to guarantee that
+  the order is always
+  - Child wrote
+  - Parent read
+  - Child said
+  Paste your code below.
+
+  #include <stdlib.h>
+  #include <stdio.h>
+  #include <unistd.h>
+  #include <sys/wait.h>
+  #include <errno.h>
+  #include <string.h>
+
+  #define PREAD 0                 // index of read end of pipe
+  #define PWRITE 1                // index of write end of pipe
+  #define BUFSIZE 1024
+
+  int main(int argc, char *argv[]) {
+
+    int par_child_pipe[2];
+    int pipe_result = pipe(par_child_pipe);
+    if(pipe_result != 0) {
+      perror("Failed to create pipe");
+      exit(1);
+    }
+
+    printf("Parent creating child process\n");
+    pid_t child_pid = fork();
+    if(child_pid <0){
+      perror("Failed to fork");
+      exit(1);
+    }
+
+    // CHILD CODE
+    if(child_pid == 0){
+      char *msg = "Send $$$ please!";
+      int msg_len = strlen(msg)+1;
+      int bytes_written = write(par_child_pipe[PWRITE], msg, msg_len);
+      printf("Child wrote %d bytes\n",bytes_written);
+      fflush(stdout);
+
+      close(par_child_pipe[PWRITE]);
+      close(par_child_pipe[PREAD]);
+      exit(0);
+    }
+
+    // PARENT CODE
+    wait(NULL);
+    char buffer[BUFSIZE];
+    int bytes_read = read(par_child_pipe[PREAD], buffer, BUFSIZE);
+    close(par_child_pipe[PWRITE]);
+    close(par_child_pipe[PREAD]);
+
+    printf("Parent read %d bytes\n",bytes_read);
+    printf("Child said: '%s'\n",buffer);
+
+    return 0;
+  }

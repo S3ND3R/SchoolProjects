@@ -45,10 +45,10 @@ int main(int argc, char *argv[]) {
   char buf[BUFSIZE];
   int infd = open(max_name, O_RDONLY);
   int flags = O_WRONLY | O_CREAT | O_TRUNC;
-  mode_t perms = S_IRUSR | S_IWUSR |S_IRWXG;
-  // struct stat sb;
-  // stat(max_name, &sb);
-  // mode_t perms = sb.st_mode;
+  // mode_t perms = S_IRUSR | S_IWUSR |S_IRWXG;
+  struct stat sb;
+  stat(max_name, &sb);
+  mode_t perms = sb.st_mode;
   int outfd = open(copy_name, flags, perms);
   int nbytes;
   while( (nbytes = read(infd, buf, BUFSIZE)) > 0){

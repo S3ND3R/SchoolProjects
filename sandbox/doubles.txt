@@ -1,0 +1,5 @@
+double val from printf: 1
+double val from printf: 2
+bin val from printf: 0
+double val from printf: 3
+bin val from printf: 1

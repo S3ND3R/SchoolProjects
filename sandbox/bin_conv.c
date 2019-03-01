@@ -3,32 +3,42 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-void to_bin(int dub, int *i_arr, int *num_read) {
+int int_to_bin(int num, int *b_arr) {
   int max_size = 1024;
-  for(int i = 0; (dub / 2) && i < max_size; i++) {
-    i_arr[i]= dub % 2;
-    dub = dub / 2;
-    *num_read = i + 1;
+  int b_length = 1;
+  printf("loop on num: %d\n", num);
+  for(int i = 0; i < max_size; i++) {
+    b_arr[i]= num % 2;
+    num = num / 2;
+    printf("num: %d\n", num);
+    if(num == 0) {
+      return b_length;
+    } else {
+      b_length ++;
+    }
   }
+  return b_length;
 }
 
 int main(int argc, char *argv[]) {
   int max_elm = 1024;
   int bin_arr[max_elm];
-  int d_array[] = {1, 2, 3, 4, 5, 6, 7};
-  int num_elem = sizeof(d_array) / sizeof(double);
+  int i_array[] = {1, 2, 3, 4, 5, 6, 7};
+  int num_elem = sizeof(i_array) / sizeof(int);
   FILE *out = fopen(argv[1], "w");
   if(out == NULL) {
     perror("Couldn't open file");
     exit(1);
   }
   for(int i = 0; i < num_elem; i++) {
-    int numread;
-    to_bin(d_array[i], bin_arr, &numread);
-    fprintf(out, "double val from printf: %d\n", d_array[i]);
-    for(int j = 0; j < numread; j++) {
-      fprintf(out, "bin val from printf: %d\n", bin_arr[j]);
+    int num_read;
+    num_read = int_to_bin(i_array[i], bin_arr);
+    fprintf(out, "double val from printf: %d\n", i_array[i]);
+    fprintf(out, "bin val from printf:");
+    for(int j = 0; j < num_read; j++) {
+      fprintf(out, "%d ", bin_arr[j]);
     }
+    fprintf(out, "\n");
   }
   return 0;
 }

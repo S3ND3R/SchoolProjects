@@ -1,0 +1,145 @@
+                           __________________
+
+                            LAB 06 QUESTIONS
+                           __________________
+
+
+- Name: Warren Weber
+- NetID: weber767
+
+Answer the questions below according to the lab specification. Write
+your answers directly in this text file and submit it to complete the
+lab.
+
+
+PROBLEM 1: Binary File Format w/ Read
+=====================================
+
+A
+~
+
+  Compile all programs in the lab code directory with the provided
+  `Makefile'.  Run the command
+  ,----
+  | ./make_dept_directory cse_depts.dat
+  `----
+  to create the `cse_depts.dat' binary file. Examine the source code for
+  this program the header `department.h'. Explain the format of the
+  binary file `cse_depts.dat'.
+  - What system calls are used in `make_dept_directory.c' to create this
+    file?
+    ----
+    
+    ----
+  - How is the `sizeof()' operator used to simplify some of the
+    computations in `make_dept_directory.c'?
+  - What data is in `cse_depts.dat' and how is it ordered?
+
+
+B
+~
+
+  Run the `print_department_read' program which takes a binary data file
+  and a department code to print.  Show a few examples of running this
+  program with the valid command line arguments. Include in your demo
+  runs that
+  - Use the `cse_depts.dat' with known and unknown department codes
+  - Use a file other than `cse_depts.dat'
+
+
+C
+~
+
+  Study the source code for `print_department_read' and describe how it
+  initially prints the table of offsets shown below.
+  ,----
+  | Dept Name: CS Offset: 104
+  | Dept Name: EE Offset: 2152
+  | Dept Name: IT Offset: 3688
+  `----
+  What specific sequence of calls leads to this information?
+
+
+D
+~
+
+  What system call is used to skip immediately to the location in the
+  file where desired contacts are located? What arguments does this
+  system call take? Consult the manual entry for this function to find
+  out how else it can be used.
+
+
+PROBLEM 2: mmap() and binary files
+==================================
+
+  An alternative to using standard I/O functions is "memory mapped"
+  files through the system call `mmap()'. The program
+  `print_department_mmap.c' provides the functionality as the previous
+  `print_department_read.c' but uses a different mechanism.
+
+
+(A)
+~~~
+
+  Early in `print_department_mmap.c' an `open()' call is used as in the
+  previous program but it is followed shortly by a call to `mmap()' in
+  the lines
+  ,----
+  |   char *file_bytes =
+  |     mmap(NULL, size, PROT_READ, MAP_SHARED,
+  |          fd, 0);
+  `----
+  Look up reference documentation on `mmap()' and describe some of the
+  arguments to it including the `NULL' and `size' arguments. Also
+  describe its return value.
+
+
+(B)
+~~~
+
+  The initial setup of the program uses `mmap()' to assign a pointer to
+  variable `char *file_bytes'.  This pointer will refer directly to the
+  bytes of the binary file.
+
+  Examine the lines
+  ,----
+  |   ////////////////////////////////////////////////////////////////////////////////
+  |   // CHECK the file_header_t struct for integrity, size of department array
+  |   file_header_t *header = (file_header_t *) file_bytes; // binary header struct is first thing in the file
+  `----
+
+  Explain what is happening here: what value will the variable `header'
+  get and how is it used in subsequent lines.
+
+
+(C)
+~~~
+
+  After finishing with the file header, the next section of the program
+  begins with the following.
+  ,----
+  |   ////////////////////////////////////////////////////////////////////////////////
+  |   // SEARCH the array of department offsets for the department named
+  |   // on the command line
+  |
+  |   dept_offset_t *offsets =           // after file header, array of dept_offset_t structures
+  |     (dept_offset_t *) (file_bytes + sizeof(file_header_t));
+  |
+  `----
+
+  Explain what value the `offsets_arr' variable is assigned and how it
+  is used in the remainder of the SEARCH section.
+
+
+(D)
+~~~
+
+  The final phase of the program begins below
+  ,----
+  |   ////////////////////////////////////////////////////////////////////////////////
+  |   // PRINT out all personnel in the specified department
+  |   ...
+  |   contact_t *dept_contacts = (contact_t *) (file_bytes + offset);
+  `----
+  Describe what value `dept_contacts' is assigned and how the final
+  phase uses it.

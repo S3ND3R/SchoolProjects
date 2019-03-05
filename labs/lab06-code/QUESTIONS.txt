@@ -28,13 +28,34 @@ A
   binary file `cse_depts.dat'.
   - What system calls are used in `make_dept_directory.c' to create this
     file?
-    ----
-    
-    ----
+    ----------------------------------------------------------------------------
+      1. open ()
+
+      2. write()
+
+      3. close()
+    ----------------------------------------------------------------------------
   - How is the `sizeof()' operator used to simplify some of the
     computations in `make_dept_directory.c'?
-  - What data is in `cse_depts.dat' and how is it ordered?
+    ----------------------------------------------------------------------------
+      'sizeof()' is used to get the amount of bytes used by the type passed to
+      it, which in the case of 'make_dept_directory.c' is used to:
 
+      - Correctly set the number of contacts by dividing the bytes used for a
+        a contact_t array by the bytes need for a contact_t.
+
+      - Set the offsets to the appropriate location.
+
+      - write the bytes in the array equal to the amount of bytes in the array
+    ----------------------------------------------------------------------------
+  - What data is in `cse_depts.dat' and how is it ordered?
+    ----------------------------------------------------------------------------
+     - file_header : a file_header_t struct
+     - offsets : an array of dept_offset_t structs
+     - cs_dept : an array of contact_t structs
+     - ee_dept : an array of contact_t structs
+     - it_dept : an array of contact_t structs
+    ----------------------------------------------------------------------------
 
 B
 ~
@@ -44,7 +65,53 @@ B
   program with the valid command line arguments. Include in your demo
   runs that
   - Use the `cse_depts.dat' with known and unknown department codes
+  ,----
+  |  weber767@csel-kh4250-29:/home/weber767/csci4061/csci4061-repo/labs/lab06-code $
+  |  ./print_department_read cse_depts.dat CS
+  |  Dept Name: CS Offset: 104
+  |  Dept Name: EE Offset: 2152
+  |  Dept Name: IT Offset: 3688
+  |
+  |  8 Contacts for CS department
+  |  Arindam Banerjee <baner029@umn.edu>
+  |  Daniel Boley <boley@umn.edu>
+  |  Abhishek Chandra <chandra@umn.edu>
+  |  David Hung-Chang Du <du@umn.edu>
+  |  Maria Gini <gini@umn.edu>
+  |  Stephen Guy <sjguy@umn.edu>
+  |  Tian He <tianhe@umn.edu>
+  |  Mats Heimdahl <heimdahl@umn.edu>
+  |
+  |
+  |  weber767@csel-kh4250-29:/home/weber767/csci4061/csci4061-repo/labs/lab06-code $
+  | ./print_department_read cse_depts.dat SD
+  |  Dept Name: CS Offset: 104
+  |  Dept Name: EE Offset: 2152
+  |  Dept Name: IT Offset: 3688
+  |  Department code 'SD' not found
+  |
+  `----
   - Use a file other than `cse_depts.dat'
+  ,----
+  |
+  |  weber767@csel-kh4250-29:/home/weber767/csci4061/csci4061-repo/labs/lab06-code $
+  |  ./print_department_read cse_depts.dat.bk EE
+  |  Dept Name: CS Offset: 104
+  |  Dept Name: EE Offset: 2152
+  |  Dept Name: IT Offset: 3688
+  |
+  |  6 Contacts for EE department
+  |  Mehmet Akcakaya <akcakaya@umn.edu>
+  |  Massoud Amin <amin@umn.edu>
+  |  Kia Bazargan <kia@umn.edu>
+  |  Itshak Bergel <ibergel@umn.edu>
+  |  Stephen Campbell <scampbell@umn.edu>
+  |
+  |  weber767@csel-kh4250-29:/home/weber767/csci4061/csci4061-repo/labs/lab06-code $
+  |   ./print_department_read department.h EE
+  |  'department.h' does not appear to be a binary department directory file
+  |
+  `----
 
 
 C
@@ -58,8 +125,14 @@ C
   | Dept Name: IT Offset: 3688
   `----
   What specific sequence of calls leads to this information?
-
-
+  ------------------------------------------------------------------------------
+    If the file passed in from arg[1] is valid, the header is checked for the
+    number of departments. Then for the number of dept_offset_t structs, which
+    each represent a department, first a temporary dept_offset_t called dept is
+    created. Second read is called with the file descriptor of the opened file,
+    a pointer to dept, and the size of a dept_offset_t. Finally the printf() call
+    outputs dept.dept_code and dept.offset in the string formatted in the style
+    shown above.
 D
 ~
 

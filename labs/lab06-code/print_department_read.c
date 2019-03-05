@@ -110,7 +110,7 @@ int main(int argc, char *argv[]){
       num_contacts = dept.num_contacts;
     }
   }
-  
+
   if(offset == -1){                      // check if department not found
     printf("Department code '%s' not found\n", dept_code);
     exit(1);

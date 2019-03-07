@@ -1,4 +1,4 @@
-// department.h: header file which defines the structures required for department listings.  
+// department.h: header file which defines the structures required for department listings.
 
 #ifndef DEPARTMENT_H
 #define DEPARTMENT_H 1
@@ -23,7 +23,7 @@ typedef struct {
 // struct describing a single department contact
 typedef struct {
   char name[128];      // name of contact person
-  char email[128];     // email address 
+  char email[128];     // email address
 } contact_t;
 
 #endif

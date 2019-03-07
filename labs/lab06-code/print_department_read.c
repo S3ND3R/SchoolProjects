@@ -99,10 +99,10 @@ int main(int argc, char *argv[]){
 
   size_t offset = -1;
   int num_contacts = -1;
-  for(int i=0; i<num_depts; i++){        // iterate over the array checking for desired department_code
+  for(int i=0; i < num_depts; i++){        // iterate over the array checking for desired department_code
     dept_offset_t dept;
     read(fd, &dept, sizeof(dept_offset_t));
-    printf("Dept Name: %s Offset: %lu\n",
+    printf("%d Dept Name: %s Offset: %lu\n", i,
            dept.dept_code, dept.offset);
 
     if( strcmp(dept_code, dept.dept_code)==0 ){

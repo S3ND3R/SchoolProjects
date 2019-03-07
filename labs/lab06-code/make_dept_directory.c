@@ -58,7 +58,7 @@ contact_t cs_dept[] = {
   {"Tian He","tianhe@umn.edu"},
   {"Mats Heimdahl","heimdahl@umn.edu"},
 };
-  
+
 contact_t ee_dept[] = {
   {"Mehmet Akcakaya","akcakaya@umn.edu"},
   {"Massoud Amin","amin@umn.edu"},
@@ -67,7 +67,7 @@ contact_t ee_dept[] = {
   {"Itshak Bergel","ibergel@umn.edu"},
   {"Stephen Campbell","scampbell@umn.edu"},
 };
-  
+
 contact_t it_dept[] = {
   {"Joseph Axberg","jaxberg@umn.edu"},
   {"Carl Follstad","follstad@umn.edu"},
@@ -81,10 +81,11 @@ contact_t it_dept[] = {
 // bytes of arrays that are compile-time constants, divide to get
 // number of elements.
 dept_offset_t offsets[] = {
-  {.dept_code="CS", .offset=-1, .num_contacts=sizeof(cs_dept)/sizeof(contact_t)}, 
+  {.dept_code="CS", .offset=-1, .num_contacts=sizeof(cs_dept)/sizeof(contact_t)},
   {.dept_code="EE", .offset=-1, .num_contacts=sizeof(ee_dept)/sizeof(contact_t)},
   {.dept_code="IT", .offset=-1, .num_contacts=sizeof(it_dept)/sizeof(contact_t)},
 };
+#include <fcntl.h>
 
 file_header_t file_header = {
   .ident={0xDE,'D','I','R'},
@@ -104,13 +105,13 @@ int main(int argc, char *argv[]){
   offsets[2].offset = offsets[1].offset + sizeof(ee_dept);
 
   int fd = open(argv[1],O_WRONLY | O_CREAT, S_IRUSR | S_IWUSR);
-  
-  write(fd, &file_header, sizeof(file_header)); 
+
+  write(fd, &file_header, sizeof(file_header));
   write(fd, &offsets,     sizeof(offsets)); // sizeof() returns size in bytes of entire fixed array
   write(fd, &cs_dept,     sizeof(cs_dept));
   write(fd, &ee_dept,     sizeof(ee_dept));
   write(fd, &it_dept,     sizeof(it_dept));
-  
+
   close(fd);
   return 0;
 }

@@ -28,6 +28,7 @@ A
   binary file `cse_depts.dat'.
   - What system calls are used in `make_dept_directory.c' to create this
     file?
+
     ----------------------------------------------------------------------------
       1. open ()
 
@@ -35,8 +36,10 @@ A
 
       3. close()
     ----------------------------------------------------------------------------
+
   - How is the `sizeof()' operator used to simplify some of the
     computations in `make_dept_directory.c'?
+
     ----------------------------------------------------------------------------
       'sizeof()' is used to get the amount of bytes used by the type passed to
       it, which in the case of 'make_dept_directory.c' is used to:
@@ -48,7 +51,9 @@ A
 
       - write the bytes in the array equal to the amount of bytes in the array
     ----------------------------------------------------------------------------
+
   - What data is in `cse_depts.dat' and how is it ordered?
+
     ----------------------------------------------------------------------------
      - file_header : a file_header_t struct
      - offsets : an array of dept_offset_t structs
@@ -65,6 +70,7 @@ B
   program with the valid command line arguments. Include in your demo
   runs that
   - Use the `cse_depts.dat' with known and unknown department codes
+
   ,----
   |  weber767@csel-kh4250-29:/home/weber767/csci4061/csci4061-repo/labs/lab06-code $
   |  ./print_department_read cse_depts.dat CS
@@ -113,7 +119,6 @@ B
   |
   `----
 
-
 C
 ~
 
@@ -125,6 +130,7 @@ C
   | Dept Name: IT Offset: 3688
   `----
   What specific sequence of calls leads to this information?
+
   ------------------------------------------------------------------------------
     If the file passed in from arg[1] is valid, the header is checked for the
     number of departments. Then for the number of dept_offset_t structs, which
@@ -133,6 +139,8 @@ C
     a pointer to dept, and the size of a dept_offset_t. Finally the printf() call
     outputs dept.dept_code and dept.offset in the string formatted in the style
     shown above.
+  ------------------------------------------------------------------------------
+
 D
 ~
 
@@ -141,6 +149,18 @@ D
   system call take? Consult the manual entry for this function to find
   out how else it can be used.
 
+  ------------------------------------------------------------------------------
+    lseek()
+      -arguments : file descriptor (int), offset value (off_t),
+                   whence directive (int)
+        the whence directs how the offset will be set in the file
+
+      different values for whence can have the offset set to the offset value
+      passed, as in 'print_department_read.c', or it can do various things like:
+        - current location plus passed offset
+        - set at size of file plus passed offset
+        - next location greater than or equal to the offset containing data
+  ------------------------------------------------------------------------------
 
 PROBLEM 2: mmap() and binary files
 ==================================
@@ -166,6 +186,21 @@ PROBLEM 2: mmap() and binary files
   arguments to it including the `NULL' and `size' arguments. Also
   describe its return value.
 
+  ------------------------------------------------------------------------------
+  mmap() arguments:
+    - the first argument is a starting address for the mapping, if NULL the
+      kernel chooses the address
+    - the second argument is the length of the mapping
+    - third argument is the memory protection of the argument
+        - read, write, execute, not accessible
+    - fourth is a flag setting visibility for the mapping
+        - MAP_SHARED lets the mapping be seen by child processes
+    - fifth is the file descriptor for the opened file
+    - last is offset location
+
+    if successful a pointer to the mapping is returned else a MAP_FAILED value
+    is returned
+  ------------------------------------------------------------------------------
 
 (B)
 ~~~
@@ -184,6 +219,11 @@ PROBLEM 2: mmap() and binary files
   Explain what is happening here: what value will the variable `header'
   get and how is it used in subsequent lines.
 
+  ------------------------------------------------------------------------------
+    The character pointer file_bytes that points to the memory mapping is being
+    cast to be a file_header_t pointer. After casting it will now be a pointer
+    to a file_header_t and can now access the struct members in the file header.
+  ------------------------------------------------------------------------------
 
 (C)
 ~~~
@@ -203,6 +243,12 @@ PROBLEM 2: mmap() and binary files
   Explain what value the `offsets_arr' variable is assigned and how it
   is used in the remainder of the SEARCH section.
 
+  ------------------------------------------------------------------------------
+    offset_arr is assigned a dept_offset_t pointer that was cast from the
+    file_bytes pointer at the offset after the file header.
+
+    that pointer is used to access departments directly within a for loop by
+  ------------------------------------------------------------------------------
 
 (D)
 ~~~
@@ -216,3 +262,13 @@ PROBLEM 2: mmap() and binary files
   `----
   Describe what value `dept_contacts' is assigned and how the final
   phase uses it.
+
+  ------------------------------------------------------------------------------
+   dept_contacts is a contact_t pointer that points to the offset location that
+   was the offset that the contact_t was found to be at within file_header. the
+   file_header was a char pointer that needed to be cast to the contact_t * to
+   be able to access that structs members.
+
+   now the contacts can be looped through and the contacts name and email can
+   be printed out.
+  ------------------------------------------------------------------------------ 

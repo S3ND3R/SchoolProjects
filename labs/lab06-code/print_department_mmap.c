@@ -114,9 +114,9 @@ int main(int argc, char *argv[]){
       num_contacts = offsets_arr[i].num_contacts;
     }
   }
-  
+
   if(offset == -1){                      // check if department not found
-    printf("Department code '%s' not found\n", 
+    printf("Department code '%s' not found\n",
            dept_code);
     exit(1);
   }
@@ -128,7 +128,7 @@ int main(int argc, char *argv[]){
 
   // get a pointer to array of contact_t's for the given department
   contact_t *dept_contacts = (contact_t *) (file_bytes + offset);
-  
+
   printf("\n%d Contacts for %s department\n",num_contacts,dept_code);
 
   for(int i=0; i<num_contacts; i++){         // iterate over array and print contacts

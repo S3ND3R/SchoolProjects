@@ -179,6 +179,13 @@ A
   `----
   and show the output below.
 
+  ,----
+  |  Sithi uhm ingonyama
+  |  Nants ingonyama bagithi baba
+  |  Sithi uhm ingonyama
+  |  kill result: 0
+  |  child process 3973 terminated with signal 2
+  `----
 
 B
 ~
@@ -188,6 +195,15 @@ B
   child program. Paste this line below and explain which signal is being
   sent.
 
+  ------------------------------------------------------------------------------
+
+  ,----
+  |  int result = kill(pid,SIGINT);
+  `----
+
+  The interrupt signal is being sent to the pid process, because the second
+  argument passed is the SIGINT signal.
+  ------------------------------------------------------------------------------
 
 C
 ~
@@ -197,6 +213,20 @@ C
   lines of code which determine if a child was terminated due to a
   signal below and mention the macros used for this purpose.
 
+  ------------------------------------------------------------------------------
+
+  ,----
+  |  if(WIFSIGNALED(status)){
+  |    printf("child process %d terminated with signal %d\n",
+  |           pid,WTERMSIG(status));
+  |  }
+  `----
+
+  - WIFSIGNALED(status)
+      returns true if a child process was terminated by a signal
+  - WTERMSIG(status)
+      returns the signal that was used to terminate the child process
+  ------------------------------------------------------------------------------
 
 D
 ~
@@ -211,6 +241,45 @@ D
   | pkill -KILL no_inter  # send KILL signal to proc name matching "no_inter"
   `----
 
+  ,----
+  | ./birth_death ./no_inter 4
+  |  Ma-na na-na!
+  |
+  |  No SIGINT-erruptions allowed.
+  |  kill result: 0
+  |  kill result: 0
+  |
+  |  No SIGINT-erruptions allowed.
+  |  Ma-na na-na!
+  |  kill result: 0
+  |
+  |  No SIGINT-erruptions allowed.
+  |  kill result: 0
+  |
+  |  No SIGINT-erruptions allowed.
+  |  Ma-na na-na!
+  |  kill result: 0
+  |
+  |  No SIGINT-erruptions allowed.
+  |  kill result: 0
+  |
+  |  No SIGINT-erruptions allowed.
+  |  Ma-na na-na!
+  |  kill result: 0
+  |
+  |  No SIGINT-erruptions allowed.
+  |  kill result: 0
+  |
+  |  No SIGINT-erruptions allowed.
+  |  Ma-na na-na!
+  |  kill result: 0
+  |
+  |  No SIGINT-erruptions allowed.
+  |  kill result: 0
+  |
+  |  No SIGINT-erruptions allowed.
+  |  child process 5121 terminated with signal 9
+  `----
 
 E
 ~
@@ -218,3 +287,32 @@ E
   Examine the `no_interruptions.c' code and describe how it is able to
   avoid being killed when receiving the interrupt and TERM signals. Show
   the lines of code used to accomplish this signal handling.
+
+  ------------------------------------------------------------------------------
+    'no_interruptions.c' is able to avoid being killed by altering the actions
+  taken when an interrupt signal or termination signal are sent to the process,
+  by use of the 'signal()' call. The 'signal()' call blocks the normal signal
+  action and then calls the passed handler function, with the blocked signal's
+  number.
+
+  signal call:
+  ,----
+  |  signal(SIGINT, handle_SIGINT);
+  |  signal(SIGTERM, handle_SIGTERM);
+  `----
+
+  handlers:
+  ,----
+  |  void handle_SIGINT(int sig_num) {
+  |    signal(SIGINT, handle_SIGINT);
+  |    printf("\nNo SIGINT-erruptions allowed.\n");
+  |    fflush(stdout);
+  |  }
+  |
+  |  void handle_SIGTERM(int sig_num) {
+  |    signal(SIGTERM, handle_SIGTERM);
+  |    printf("\nTry to SIGTERM me? Piss off!\n");
+  |    fflush(stdout);
+  |  }
+  `----
+  ------------------------------------------------------------------------------

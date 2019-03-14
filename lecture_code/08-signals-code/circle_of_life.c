@@ -1,7 +1,6 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
-#include <signal.h>
 
 // https://genius.com/Walt-disney-records-circle-of-life-lyrics
 char *lyrics[] = {
@@ -39,24 +38,7 @@ char *lyrics[] = {
 };
 
 
-void int_handler(int sig_num){
-  printf("THE CIRCLE OF LIFE CONTINUES ON...\n");
-  pid_t pid = fork();
-  if(pid == 0) {  // in child
-    if (execlp("./circle_of_life", "./circle_of_life") == -1) {
-      perror("exec failed");
-      exit(1);
-    };
-  }
-}
-
 int main(){
-  struct sigaction my_sa = {};
-  sigemptyset(&my_sa.sa_mask);
-  my_sa.sa_flags = SA_RESTART;
-  my_sa.sa_handler = int_handler;
-  sigaction(SIGINT, &my_sa, NULL);
-  sigaction(SIGTERM, &my_sa, NULL);
   int index = 0;
   while(lyrics[index] != NULL){
     printf("%s\n",lyrics[index]);

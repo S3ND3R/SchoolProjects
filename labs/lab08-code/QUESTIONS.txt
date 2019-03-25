@@ -1,0 +1,142 @@
+                           __________________
+
+                            LAB 08 QUESTIONS
+                           __________________
+
+
+- Name: (FILL THIS in)
+- NetID: (THE kauf0095 IN kauf0095@umn.edu)
+
+Answer the questions below according to the lab specification. Write
+your answers directly in this text file and submit it to complete the
+lab.
+
+
+PROBLEM 1 `sleep_print.c'
+=========================
+
+A
+~
+
+  Compile `sleep_print.c' using the provided `Makefile' which compiles
+  it to `sleep_print'.  Run the program as
+  ,----
+  | ./sleep_print 1 "hello"
+  `----
+  After a few seconds, press Ctrl-C to send an interrupt signal.  Paste
+  the results of your run below.
+
+
+B
+~
+
+  Examine the code for `sleep_print.c' and note the use of the
+  `sigaction()' function to set up signal handlers. Inspect the signal
+  handler function and describe how the signal handler causes the
+  `sleep_print' to shut down in the space below.
+
+
+PROBLEM 2 `read_AB.c'
+=====================
+
+  Note that `read_AB.c' uses the same techniques as `sleep_print.c' to
+  set up signal handlers and shut down on receiving a signal.
+
+
+A
+~
+
+  Compile `read_AB.c' and run it. Paste the results of running it for a
+  few seconds below.  Use Ctl-C to send an interrupt to end the program.
+
+
+B
+~
+
+  Examine the code for `read_AB.c' and note where `pipe(), fork(),
+  dup2()' are used to set up a communication channel for two children
+  referred to as A and B. Note that these two children both run
+  `sleep_print' but A has a 1 second delay while B has a 3 second delay.
+  Note the main `while()' of `read_AB' which repeatedly reads from the
+  pipes of its children.
+
+  In the space below explain why the output for the program has the
+  ordering that it does despite A producing A at a faster rate (every 1
+  second) than B (every 3 seconds).
+
+
+C
+~
+
+  In the output for `read_AB' there should be some lines for Child A
+  that look like
+  ,----
+  | A had: | 1 : AAAA |
+  `----
+  but also some lines that look like
+  ,----
+  | A had: | 4 : AAAA  5 : AAAA |
+  `----
+  and
+  ,----
+  | A had: |15 : AAAA 16 : AAAA 17 : AAAA |
+  `----
+  while Child B lines always look like
+  ,----
+  | B had: | 4 : BBBB |
+  `----
+  Explain why there is variance in Child A lines while Child B lines
+  look the same.
+
+
+PROBLEM 3 `select_AB.c'
+=======================
+
+  Note that `select_AB.c' uses the same techniques as `sleep_print.c' to
+  set up signal handlers and shut down on receiving a signal.
+
+
+A
+~
+
+  Compile `select_AB.c' and run it. Paste the results of running it for
+  a few seconds below.  Use Ctl-C to send an interrupt to end the
+  program.
+
+
+B
+~
+
+  Examine the code for `select_AB.c'. Like `read_AB', it uses `pipe(),
+  fork(), dup2()' to set up a communication channel for two children, A
+  and B, which run `sleep_print' at differing rates.  However, the main
+  `while()' of `select_AB' uses the `select()' system call to sleep
+  until output is available from a child.
+
+  In the space below explain why the output for the `select_AB' has the
+  ordering that it does and why it differs from `read_AB'.
+
+
+C
+~
+
+  Part of the setup for the `select()' system call manipulates an
+  `fd_set' data type using calls like `FD_ZERO'.  Do some research such
+  as reading the manual pages to determine how this type works.
+
+  Also explain how one can determine which children of A and B has input
+  available after the `select()' call returns.
+
+
+D
+~
+
+  The output for `read_AB' contained mixed lengths for child A output as
+  in
+  ,----
+  | A had: | 1 : AAAA |
+  | A had: | 4 : AAAA  5 : AAAA |
+  | A had: |15 : AAAA 16 : AAAA 17 : AAAA |
+  `----
+
+  Explain why the output for `select_AB' does not have such differences.

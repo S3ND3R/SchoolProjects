@@ -4,8 +4,8 @@
                            __________________
 
 
-- Name: (FILL THIS in)
-- NetID: (THE kauf0095 IN kauf0095@umn.edu)
+- Name: Warren Weber
+- NetID: weber767
 
 Answer the questions below according to the lab specification. Write
 your answers directly in this text file and submit it to complete the
@@ -15,7 +15,7 @@ lab.
 PROBLEM 1 `sleep_print.c'
 =========================
 
-A
+
 ~
 
   Compile `sleep_print.c' using the provided `Makefile' which compiles
@@ -26,7 +26,13 @@ A
   After a few seconds, press Ctrl-C to send an interrupt signal.  Paste
   the results of your run below.
 
-
+  ,----
+    ./sleep_print 1 "hello"
+    1 : hello  2 : hello  3 : hello  4 : hello  5 : hello  6 : hello  7 : hello
+    8 : hello  9 : hello 10 : hello 11 : hello 12 : hello 13 : hello
+    ^Csleep_print: signaled, setting flag
+    14 : hello sleep_print: finishing
+  `----
 B
 ~
 
@@ -34,6 +40,17 @@ B
   `sigaction()' function to set up signal handlers. Inspect the signal
   handler function and describe how the signal handler causes the
   `sleep_print' to shut down in the space below.
+
+  ------------------------------------------------------------------------------
+    The print loop continues as long as the variable 'signaled' is set to 0. The
+    'sleep()' call will either wait for the passed duration or until a signal is
+    sent. The 'sigaction()' call changes how the signal is handled when it is
+    received by the process. 'sigaction()' handles the signal according to what
+    the sigaction.sa_handler is set to. In 'sleep_print.c' sigaction.sa_handler
+    is set to the function 'handle_signals', which writes msg to STDERR and
+    then sets 'signaled' to 1. This causes 'sleep_print.c' to break out of the
+    print loop after a signal has been received.
+  ------------------------------------------------------------------------------
 
 
 PROBLEM 2 `read_AB.c'
@@ -49,6 +66,24 @@ A
   Compile `read_AB.c' and run it. Paste the results of running it for a
   few seconds below.  Use Ctl-C to send an interrupt to end the program.
 
+  ,----
+      ./read_AB
+    read_AB: listening for children
+    A had: |     1 : AAAA |
+    B had: |     1 : BBBB |
+    A had: |     2 : AAAA |
+    B had: |     2 : BBBB |
+    A had: |     3 : AAAA      4 : AAAA      5 : AAAA |
+    B had: |     3 : BBBB |
+    A had: |     6 : AAAA      7 : AAAA      8 : AAAA |
+    B had: |     4 : BBBB |
+    A had: |     9 : AAAA     10 : AAAA     11 : AAAA |
+    ^Csleep_print: signaled, setting flag
+    sleep_print: signaled, setting flag
+    read_AB: signaled, setting flag
+    B had: ||
+    read_AB: finishing
+  `----
 
 B
 ~
@@ -64,6 +99,10 @@ B
   ordering that it does despite A producing A at a faster rate (every 1
   second) than B (every 3 seconds).
 
+  ------------------------------------------------------------------------------
+    'read()' blocks the calling process until data can be read from the opened
+    file descriptor.
+  ------------------------------------------------------------------------------
 
 C
 ~
@@ -88,6 +127,12 @@ C
   Explain why there is variance in Child A lines while Child B lines
   look the same.
 
+  ------------------------------------------------------------------------------
+    Child A has a shorter delay then Child B, so it continues to output to the
+    pipe while the parent process is waiting to read from Child B. Child A can
+    have them amount of its output vary depending on when Child B finally is fed
+    values into its pipe.
+  ------------------------------------------------------------------------------
 
 PROBLEM 3 `select_AB.c'
 =======================
@@ -103,6 +148,30 @@ A
   a few seconds below.  Use Ctl-C to send an interrupt to end the
   program.
 
+  ,----
+      ./select_AB
+    select_AB: listening for children
+    A had: |     1 : AAAA |
+    A had: |     2 : AAAA |
+    B had: |     1 : BBBB |
+    A had: |     3 : AAAA |
+    A had: |     4 : AAAA |
+    A had: |     5 : AAAA |
+    B had: |     2 : BBBB |
+    A had: |     6 : AAAA |
+    A had: |     7 : AAAA |
+    A had: |     8 : AAAA |
+    B had: |     3 : BBBB |
+    A had: |     9 : AAAA |
+    ^Cselect_AB: signaled, setting flag
+    sleep_print: signaled, setting flag
+    sleep_print: signaled, setting flag
+    A had: ||
+    B had: ||
+    select_AB: finishing
+  `----
+
+
 
 B
 ~
@@ -116,6 +185,14 @@ B
   In the space below explain why the output for the `select_AB' has the
   ordering that it does and why it differs from `read_AB'.
 
+  ------------------------------------------------------------------------------
+  The call to 'select()' sets the file descriptors for the pipes of Child
+  A and B if there are characters available for reading in them. 'FD_ISSET()' is
+  then used to either call read on the pipe if it has been set or ignore it.
+  this means that, unlike in read_AB, the parent process is no longer blocked
+  while it waits for Child B to be ready.
+  ------------------------------------------------------------------------------
+
 
 C
 ~
@@ -126,6 +203,17 @@ C
 
   Also explain how one can determine which children of A and B has input
   available after the `select()' call returns.
+
+  ------------------------------------------------------------------------------
+  `FD_ZERO' initalizes the bits for file descriptors in fd_set  to all be set to
+  zero.
+
+  'FD_SET' sets the bit for a file descriptor in the fd_set.
+
+  maxfd is the number of file descriptors to be tested.
+
+  'FD_ISSET()' will check whether a file descriptor in fd_set has been set.
+  ------------------------------------------------------------------------------
 
 
 D
@@ -140,3 +228,9 @@ D
   `----
 
   Explain why the output for `select_AB' does not have such differences.
+
+  ------------------------------------------------------------------------------
+  Child A is able to immediately read its output in every loop, so it never has
+  more than one output call in the pipe while it is waiting for its next call to
+  'read()'. 
+  ------------------------------------------------------------------------------

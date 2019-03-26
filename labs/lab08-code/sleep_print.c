@@ -15,8 +15,8 @@
 #include <signal.h>
 
 int signaled = 0;                                           // global variable controls exit from main loop
-void handle_signals(int signo){                             // handler for some signals 
-  char *msg = "sleep_print: signaled, setting flag\n";      // print a message about the signal 
+void handle_signals(int signo){                             // handler for some signals
+  char *msg = "sleep_print: signaled, setting flag\n";      // print a message about the signal
   write(STDERR_FILENO,msg,strlen(msg));                     // avoid fprintf() as it is not reentrant
   signaled = 1;                                             // set global variable to indicate signal received
   return;
@@ -31,7 +31,7 @@ int main(int argc, char *argv[]){
   struct sigaction my_sa = {};                              // portable signal handling setup with sigaction()
   my_sa.sa_handler = handle_signals;                        // run function handle_signals
   sigemptyset(&my_sa.sa_mask);                              // don't block any other signals during handling
-  my_sa.sa_flags = SA_RESTART;                              // always restart system calls on signals possible 
+  my_sa.sa_flags = SA_RESTART;                              // always restart system calls on signals possible
   sigaction(SIGTERM, &my_sa, NULL);                         // register SIGTERM with given action
   sigaction(SIGINT,  &my_sa, NULL);                         // register SIGINT with given action
 
@@ -40,7 +40,7 @@ int main(int argc, char *argv[]){
   int count=1;
   while(!signaled){
     sleep(delay);
-    printf("%2d : %s ",count,message);
+    printf("%6d : %s ",count,message);
     fflush(stdout);
     count++;
   }

@@ -1,0 +1,129 @@
+                           __________________
+
+                            LAB 09 QUESTIONS
+                           __________________
+
+
+- Name: (FILL THIS in)
+- NetID: (THE kauf0095 IN kauf0095@umn.edu)
+
+Answer the questions below according to the lab specification. Write
+your answers directly in this text file and submit it to complete Lab01.
+
+
+PROBLEM 1 `server_em.c'
+=======================
+
+A
+~
+
+  Examine the source code for `em_server.c'. Describe the
+  `requests.fifo' item that it creates.  Resolve theses specific items
+  1. What system call is used initially to delete any existing version
+     of `requests.fifo'?
+  2. What system call is used to create `requests.fifo'?
+  3. What system call is used to set up reading from `requests.fifo'?
+
+
+B
+~
+
+  In the main `while()' loop of the server, describe how the server
+  handles requests from the client.
+  1. What C data type represents the requests from clients and what
+     parts does it have?
+  2. How does the server use the request data to search for a name/email
+     association?
+  3. How does the server use the request data to communicate back to the
+     client?
+
+
+PROBLEM 2 `em_client.c' and Protocol
+====================================
+
+A
+~
+
+  Examine the code for `em_client.c'. Describe the steps that it
+  performs to contact the server to make a request and then receive the
+  response.  Describe how system calls are used in this process.
+
+
+B
+~
+
+  Describe the overall Protocol of communication of between the server
+  and client. Which entity is responsible for creating, reading, and
+  writing each FIFO at what time.
+
+
+C
+~
+
+  Use the provided script `run_simulation.sh <N>' to launch start a
+  server and run a specified number of clients such as 5 as below
+  ,----
+  | > ./run_simulation.sh 5
+  | SERVER 14205: starting up
+  | SERVER 14205: created new requests.fifo, now opening it
+  | SERVER 14205: opened requests.fifo, listening for requests
+  | CLIENT 14208: sending request: {fifo_file='14208.fifo' query_name='Christopher Jonathan' }
+  | CLIENT 14208: opening '14208.fifo'
+  | ...
+  | SERVER 14205: closing connection to fifo '14212.fifo'
+  | CLIENT 14211: response for name 'Dan Knights' is email 'knights@cs.umn.edu'
+  | CLIENT 14212: response for name 'George Karypis' is email 'karypis@cs.umn.edu'
+  | > 
+  `----
+  Examine the output for this run along with running the simulation
+  several more times with different numbers of clients.
+
+  Explain why there never seems to be any problem with multiple clients
+  overwriting data associated with each other particularly in the
+  `requests.fifo' and the client responses.
+
+
+PROBLEM 3: Pitfalls
+===================
+
+A
+~
+
+  Compile the server/client with `make' and run the server via
+  ,----
+  | > ./em_server
+  `----
+  Note the output that it prints. Then kill the server, perhaps with a
+  C-c interrupt signal.
+
+  Edit the `em_server.c' code to use the line marked `ALTERNATE
+  OPEN'. You should comment on the preceding `open()' line to get
+  ,----
+  | // int requests_fd = open("requests.fifo", O_RDWR);               // open FIFO read/write to avoid blocking
+  | int requests_fd = open("requests.fifo", O_RDONLY);             // ALTERNATE OPEN: read only
+  `----
+
+  Recompile and re-run `em_server' and explain why the output of the
+  server changes in this case. To understand the change in output, you
+  may need to review what happens when a process opens only one end of a
+  pipe/FIFO.
+
+
+B
+~
+
+  With the ALTERNATE OPEN line in use (uncommented), run the
+  `run_simulation.sh 5' script a few times until it appears to stall and
+  fail to complete.
+
+  Examine the output of the simulation run carefully and find a line
+  involving the server that gives some hints as to why the simulation
+  fails. Show that line below.
+
+
+C
+~
+
+  Do some careful thinking, reading, and exploration and explain why the
+  ALTERNATE OPEN line creates a flaw in the server/client protocol that
+  is present in the original version.

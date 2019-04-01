@@ -4,8 +4,8 @@
                            __________________
 
 
-- Name: (FILL THIS in)
-- NetID: (THE kauf0095 IN kauf0095@umn.edu)
+- Name: Warren Weber
+- NetID: weber767
 
 Answer the questions below according to the lab specification. Write
 your answers directly in this text file and submit it to complete Lab01.
@@ -73,7 +73,7 @@ C
   | SERVER 14205: closing connection to fifo '14212.fifo'
   | CLIENT 14211: response for name 'Dan Knights' is email 'knights@cs.umn.edu'
   | CLIENT 14212: response for name 'George Karypis' is email 'karypis@cs.umn.edu'
-  | > 
+  | >
   `----
   Examine the output for this run along with running the simulation
   several more times with different numbers of clients.

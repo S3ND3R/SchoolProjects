@@ -45,7 +45,7 @@ typedef struct {
 } request_t;
 
 int main() {
-  setvbuf(stdout, NULL, _IONBF, 0); 
+  setvbuf(stdout, NULL, _IONBF, 0);
 
   printf("SERVER %5d: starting up\n", getpid());
 
@@ -60,18 +60,18 @@ int main() {
 
   while(1){                                                      // loop forever awaiting client requests
     request_t request;
-    int nread = read(requests_fd, &request, sizeof(request_t));              // read a single request from the requests FIFO
+    int nread = read(requests_fd, &request, sizeof(request_t));  // read a single request from the requests FIFO
     if(nread != sizeof(request_t)){
       printf("SERVER: read %d bytes from requests.fifo; empty pipe, exiting\n",nread);
       break;
     }
     printf("SERVER %5d: received request {client_fifo='%s' query_name='%s' }\n",
            getpid(), request.client_fifo, request.query_name);
-    
+
     char *email = "NOT FOUND";                                   // search for the name/email in the 'database' of records
     for(int i=0; data[i][0] != NULL; i++){
       if( strcmp(request.query_name, data[i][0])==0 ){
-        email = data[i][1];                                      // found name, assigne email 
+        email = data[i][1];                                      // found name, assigned email
       }
     }
 

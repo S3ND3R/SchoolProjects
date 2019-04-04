@@ -40,8 +40,8 @@ int main(int argc, char *argv[]){
   int count=1;
   while(!signaled){
     sleep(delay);
-    printf("%6d : %s ",count,message);
-    fflush(stdout);
+    printf("%6d : %s \n",count,message);
+    //fflush(stdout);
     count++;
   }
   fprintf(stderr,"sleep_print: finishing\n");               // print to stderr in case stdout is going to a pipe

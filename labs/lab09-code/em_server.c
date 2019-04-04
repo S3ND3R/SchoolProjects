@@ -53,8 +53,8 @@ int main() {
   mkfifo("requests.fifo", S_IRUSR | S_IWUSR);                    // create requests FIFO for client requests
 
   printf("SERVER %5d: created new requests.fifo, now opening it\n", getpid());
-  int requests_fd = open("requests.fifo", O_RDWR);               // open FIFO read/write to avoid blocking
-  // int requests_fd = open("requests.fifo", O_RDONLY);             // ALTERNATE OPEN: read only
+  //int requests_fd = open("requests.fifo", O_RDWR);               // open FIFO read/write to avoid blocking
+  int requests_fd = open("requests.fifo", O_RDONLY);             // ALTERNATE OPEN: read only
 
   printf("SERVER %5d: opened requests.fifo, listening for requests\n", getpid());
 

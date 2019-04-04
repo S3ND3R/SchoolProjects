@@ -24,7 +24,19 @@ A
   2. What system call is used to create `requests.fifo'?
   3. What system call is used to set up reading from `requests.fifo'?
 
+  ------------------------------------------------------------------------------
+    'request.fifo' is a FIFO, which is a named pipe. It is similar to a pipe,
+    except it persists as a special type of file, which allows it to outlive
+    the process that created it. This allows for multiple processes that are
+    unrelated to share access to the FIFO, whereas a pipe can only connect
+    related processes.
 
+  1. remove()
+
+  2. mkfifo()
+
+  3. open()
+  ------------------------------------------------------------------------------
 B
 ~
 
@@ -36,7 +48,19 @@ B
      association?
   3. How does the server use the request data to communicate back to the
      client?
+  ------------------------------------------------------------------------------
+  1. request_t
+      - char client_fifo[], a filename connected to a FIFO
+      - char query_name[], name attached to an email
 
+  2. The server reads from 'requests.fifo' into request, a request_t data
+     type. Then a for loop runs through the data array checking the each name
+     against 'request.query_name'. If a match is found the variable 'email' is
+     to the email associated with that name, else 'email' contains "NOT FOUND".
+
+  3. The server opens the FIFO that was passed into 'request.client_fifo' and
+     writes to it.
+  ------------------------------------------------------------------------------
 
 PROBLEM 2 `em_client.c' and Protocol
 ====================================
@@ -48,6 +72,25 @@ A
   performs to contact the server to make a request and then receive the
   response.  Describe how system calls are used in this process.
 
+  ------------------------------------------------------------------------------
+  Step 1: SETUP
+    The client creates a request using the 'request_t' data type. Then makes a
+    FIFO that it can pass to the server which can be written to later on.
+      - getpid() is used for naming the FIFO
+      - mkfifo() is used for naming the client FIFO that the server will be able
+        to see when it checks 'request.client_fifo'
+
+  STEP 2: SENDING THE REQUEST
+    The client then opens the FIFO related to the server and writes their
+    request to it.
+      - open() used to open the server FIFO 'request.fifo'
+      - write() used to write the request to the FIFO
+
+  STEP 3: RECEIVING THE RESPONSE
+    The client reads from 'request.client_fifo' to see the servers response
+      - read() is used to read from the file, and it causes the client to wait
+        for a response from the server
+  ------------------------------------------------------------------------------
 
 B
 ~
@@ -56,6 +99,24 @@ B
   and client. Which entity is responsible for creating, reading, and
   writing each FIFO at what time.
 
+  ------------------------------------------------------------------------------
+  1. Server creates 'requests.fifo' FIFO
+  2. Server opens 'requests.fifo' and attempts to read from it, which will block
+     the process until something is written to that FIFO
+  3. Client creates the 'request.client_fifo'
+  4. Client opens 'requests.fifo'
+  5. Client writes to 'requests.fifo'
+  NON-DETERMINISTIC BEHAVIOR ???
+  6. Client opens 'request.client_fifo'
+  7. Client attempts to read from 'request.client_fifo', if nothing is written
+     to the FIFO yet it will block the process
+  8. Server opens 'request.client_fifo'
+  9. Server writes to 'request.client_fifo'
+  10. Server closes 'request.client_fifo'
+  11. Client closes 'request.client_fifo'
+  12. Client closes 'requests.fifo'
+  13. Client removes 'request.client_fifo'
+  ------------------------------------------------------------------------------
 
 C
 ~
@@ -81,6 +142,12 @@ C
   Explain why there never seems to be any problem with multiple clients
   overwriting data associated with each other particularly in the
   `requests.fifo' and the client responses.
+
+  ------------------------------------------------------------------------------
+  FIFOs have one offset that the operating system keeps track of, so they will
+  never overwrite a previous request in `requests.fifo'. The client response
+  FIFO is specific to each client process.
+  ------------------------------------------------------------------------------
 
 
 PROBLEM 3: Pitfalls
@@ -108,6 +175,10 @@ A
   may need to review what happens when a process opens only one end of a
   pipe/FIFO.
 
+  ------------------------------------------------------------------------------
+  When only one end of a FIFO has been opened the process is sent a SIGPIPE
+  signal and will be blocked until the other end of the FIFO has been opened.
+  ------------------------------------------------------------------------------
 
 B
 ~
@@ -120,6 +191,9 @@ B
   involving the server that gives some hints as to why the simulation
   fails. Show that line below.
 
+  ,----
+
+  `----
 
 C
 ~
@@ -127,3 +201,7 @@ C
   Do some careful thinking, reading, and exploration and explain why the
   ALTERNATE OPEN line creates a flaw in the server/client protocol that
   is present in the original version.
+
+  ------------------------------------------------------------------------------
+
+  ------------------------------------------------------------------------------

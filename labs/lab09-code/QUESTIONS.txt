@@ -145,8 +145,9 @@ C
 
   ------------------------------------------------------------------------------
   FIFOs have one offset that the operating system keeps track of, so they will
-  never overwrite a previous request in `requests.fifo'. The client response
-  FIFO is specific to each client process.
+  never overwrite a previous request in `requests.fifo', and the FIFO writes
+  atomically, so the entire write from a client is completed before the next.
+  The client response FIFO is specific to each client process.
   ------------------------------------------------------------------------------
 
 
@@ -192,7 +193,7 @@ B
   fails. Show that line below.
 
   ,----
-
+    SERVER: read 0 bytes from requests.fifo; empty pipe, exiting
   `----
 
 C
@@ -203,5 +204,5 @@ C
   is present in the original version.
 
   ------------------------------------------------------------------------------
-
+    non-blocking 
   ------------------------------------------------------------------------------

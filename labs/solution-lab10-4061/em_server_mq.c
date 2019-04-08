@@ -39,21 +39,18 @@ char *data[][2] = {
 
 #define NAME_LENGTH 256
 
-/**** Request Structure ****/
 typedef struct {                                                 // structure to store a request
   char client_queue_name[NAME_LENGTH];                           // name client queue on which to respond
   char query_name[NAME_LENGTH];                                  // look up this person's email
 } request_t;
 
-/**** Signal Handling ****/
 int signalled = 0;                                               // indicates if the server should shut down at next opportunity
 void handle_signals(int sig_num){
   signalled = 1;
 }
 
 int main() {
-  setvbuf(stdout, NULL, _IONBF, 0);
-  /**** Set up Signal Catching ****/
+  setvbuf(stdout, NULL, _IONBF, 0); 
   struct sigaction my_sa = {
     .sa_handler = handle_signals,                                // run function handle_signals
   };
@@ -61,16 +58,15 @@ int main() {
   sigaction(SIGINT,  &my_sa, NULL);                              // SIGINT by shutting down
 
   printf("SERVER %5d: starting up\n", getpid());
-  /**** Set up message queue attributes ****/
+
   struct mq_attr attr = {                                        // attributes of the message queue
     .mq_maxmsg = 10,                                             // queue holds 10 messages before sending blocks (standard system max)
     .mq_msgsize = sizeof(request_t),                             // maximum size of messages
   };
-  /**** Open up message queue ****/
   mqd_t server_qd = mq_open("/em_server_q",                      // descriptor for message queue
                             O_CREAT|O_RDONLY, S_IRUSR|S_IWUSR,   // flags and permissions
                             &attr);                              // set up usin provided attr or NULL for system defaults
-
+  
   printf("SERVER %5d: created message queue, listening for requests\n", getpid());
 
   while(!signalled){                                             // loop while no signal is received
@@ -89,7 +85,7 @@ int main() {
     char *email = "NOT FOUND";                                   // search for the name/email in the 'database' of records
     for(int i=0; data[i][0] != NULL; i++){
       if( strcmp(request.query_name, data[i][0])==0 ){
-        email = data[i][1];                                      // found name, assigne email
+        email = data[i][1];                                      // found name, assigne email 
       }
     }
 
@@ -99,14 +95,14 @@ int main() {
     printf("SERVER %5d: writing email '%s' for query_name '%s'\n",
            getpid(), email, request.query_name);
     mq_send(client_qd, email, NAME_LENGTH, 0);                   // reply with results to client
-
+    
     printf("SERVER %5d: closing connection to queue '%s'\n", getpid(), request.client_queue_name);
     mq_close(client_qd);
   }
 
   printf("SERVER %5d: signalled, closing and unlinking queue\n", getpid());
   mq_close(server_qd);                                           // close the connection to the queue
-  mq_unlink("/em_server_q");                                     // remove the queue
-
+  mq_unlink("/em_server_q");                                     // remove the queue 
+  
   return 0;
 }

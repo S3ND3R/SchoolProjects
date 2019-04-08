@@ -4,8 +4,8 @@
                            __________________
 
 
-- Name: (FILL THIS in)
-- NetID: (THE kauf095 IN kauf0095@umn.edu)
+- Name: Warren Weber
+- NetID: weber767
 
 Answer the questions below according to the lab specification. Write
 your answers directly in this text file and submit it to complete Lab01.
@@ -30,6 +30,20 @@ A
   - Which of the server/clients create message queues?
   - How does this compare to the previous FIFO version in the code pack?
 
+  ------------------------------------------------------------------------
+  - mq_open(), to open a message queue
+    mq_recieve(), to pull a message out of the queue
+    mq_send(), to put a message in the queue
+    mq_close(), to close the connection to the queue
+    mq_unlink(), to remove the queue
+
+  - the server creates the message queue that receives client requests,
+    and the clients open a message queue to receive a char array, an
+    email address.
+
+  - The mq uses a signal handler to stop the server from running. The structure
+    is similar between FIFO and 
+  ------------------------------------------------------------------------
 
 B
 ~
@@ -94,3 +108,7 @@ B
     problems with the faulty protocol?
   - What concurrency issues are present that are not a problem in the
     previous message queue/FIFO versions of the server/client?
+
+  ------------------------------------------------------------------------
+
+  ------------------------------------------------------------------------

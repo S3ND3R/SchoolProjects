@@ -31,18 +31,26 @@ A
   - How does this compare to the previous FIFO version in the code pack?
 
   ------------------------------------------------------------------------
-  - mq_open(), to open a message queue
+  -  What specific system calls are used to create/access message queues?
+
+    mq_open(), to open a message queue
     mq_recieve(), to pull a message out of the queue
     mq_send(), to put a message in the queue
     mq_close(), to close the connection to the queue
     mq_unlink(), to remove the queue
 
-  - the server creates the message queue that receives client requests,
+  - Which of the server/clients create message queues?
+
+      The server creates the message queue that receives client requests,
     and the clients open a message queue to receive a char array, an
     email address.
 
-  - The mq uses a signal handler to stop the server from running. The structure
-    is similar between FIFO and 
+  - How does this compare to the previous FIFO version in the code pack?
+
+      The structure is similar to a FIFO, both are queues. The FIFO has a
+    maximum number of requests that can be received before the queue will
+    block, whereas the FIFO could take in requests until it hit its size
+    of 64kb.S
   ------------------------------------------------------------------------
 
 B
@@ -57,6 +65,42 @@ B
   - What are the equivalent send/receive functions in the FIFO version
     of the server?
 
+    ------------------------------------------------------------------------
+    - What arguments are required for the sending function?
+          ~ Arguments:
+              - mdq_t < mqdes >
+                  Refers to a message queue, must have already been opened
+              - char * < msg_ptr >
+                  A character pointer that points to a message, which will
+                  be added into the queue
+              - size_t < msg_length >
+                  The length of the message that is pointed to by the
+                  message pointer.
+              - unsigned int < msg_prio>
+                  priority of the message being placed in the queue.
+
+    - What arguments are required for the receiving function?
+        ~ Arguments:
+           - mqd_t  < mqdes >
+              Same use as in send.
+           - char * < msg_ptr >
+              Points to the buffer that the message from the queue will be
+              placed into
+           - size_t < msg_len >
+               The size of the buffer pointed to by the second argument
+           - unsigned int * < msg_prio >
+               Points to the priority of the message being received
+
+    - Does the same data type of message go from client to server as from
+      server to client?
+        Yes, since all messages are sent as a char pointers
+
+    - What are the equivalent send/receive functions in the FIFO version
+      of the server?
+        'read()' and 'write()' system calls are the equivalent functions in
+        FIFO.
+    ------------------------------------------------------------------------
+
 
 C
 ~
@@ -66,6 +110,9 @@ C
   last week's lab.  Are there any major similarities or difference
   between these two?
 
+    ------------------------------------------------------------------------
+    They are mostly identical
+    ------------------------------------------------------------------------
 
 PROBLEM 2: The Faulty Server
 ============================
@@ -86,6 +133,17 @@ A
   - How many message queues are there?
   - What appears to be the protocol for communication?
 
+  ------------------------------------------------------------------------
+  - How many message queues are there?
+      there are two message queues:
+        1. "/em_server_q"
+        2. "/em_reply_q"
+
+  - What appears to be the protocol for communication?
+      The server receives a message from a client in "/em_server_q" and
+      then sends its response into "/em_reply_q", where it can then be
+      received by a client process.
+  ------------------------------------------------------------------------
 
 B
 ~
@@ -110,5 +168,17 @@ B
     previous message queue/FIFO versions of the server/client?
 
   ------------------------------------------------------------------------
+  - Construct an argument as to why the protocol used in this version is
+    "faulty" as the name suggests.
+        It is faulty because it is possible for clients to grab the wrong
+        email, since the order they access the single reply queue is
+        non-deterministic
+  - Is this issue specific to Message Queues or would FIFOs have similar
+    problems with the faulty protocol?
+       FIFOS would have the same problem
 
+  - What concurrency issues are present that are not a problem in the
+    previous message queue/FIFO versions of the server/client?
+        Since replies are not placed in a queue that is specific to a
+        single client the order that they select replies now matters.
   ------------------------------------------------------------------------

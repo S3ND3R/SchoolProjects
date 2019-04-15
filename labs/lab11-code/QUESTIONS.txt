@@ -1,0 +1,131 @@
+                           __________________
+
+                            LAB 11 QUESTIONS
+                           __________________
+
+
+- Name: Warren Weber
+- NetID: weber767
+
+Answer the questions below according to the lab specification. Write
+your answers directly in this text file and submit it to complete Lab01.
+
+
+PROBLEM 1: The Setup
+====================
+
+A
+~
+
+  Compile and run `worm_pthread.c' using the provided Makefile. Make
+  sure to follow the program prompts.  Describe what you observe. Also
+  do brief research and find out what the Unix command `watch' does and
+  how it is used with this program.
+
+  ---------------------------------------------------------------------
+    'worm_pthread' creates
+  ---------------------------------------------------------------------
+
+
+B
+~
+
+  Consult the structure of the `main()' function. Determine how changes
+  to the file `worm_board.txt' are made. What special tricks are used to
+  make it relatively easy to change the file AND to change specific
+  portions of the file.
+
+  ---------------------------------------------------------------------
+
+  ---------------------------------------------------------------------
+
+
+C
+~
+
+  Describe the area of code in `main()' which creates threads and awaits
+  them finishing.
+  - Describe the function which is used to start a thread running and
+    its arguments. Consult the manual for documentation on this function
+    if needed.
+  - Describe the function which is used to wait until a thread finishes.
+
+  ---------------------------------------------------------------------
+
+  ---------------------------------------------------------------------
+
+
+PROBLEM 2: The Worms
+====================
+
+A
+~
+
+  Examine the `worm_func()' function carefully.  You may wish to
+  consider the specific data passed to these worms which are in the
+  array of `wormparam_t' structs midway through `main()'.
+
+  Describe the basic algorithm that worms follow to do their work.
+
+  ---------------------------------------------------------------------
+
+  ---------------------------------------------------------------------
+
+
+B
+~
+
+  Describe how worms avoid both claiming the same piece of
+  territory. What system call mechanism is used to ensure that two worms
+  cannot claim the same area of the board? Describe the function calls
+  that are used to accomplish this and what functions in `main()' are
+  used to set up this coordination mechanism.
+
+  ---------------------------------------------------------------------
+
+  ---------------------------------------------------------------------
+
+
+C
+~
+
+  Describe the logic that appears to cause worms to be 'fast' and
+  'slow': how is this artificial speed actually created in the
+  `worm_func()' code.
+
+  While the speed differences of worms is an intended creation of the
+  program, speculate as to what use threads can be when dealing with
+  entities of different speeds.
+
+  ---------------------------------------------------------------------
+
+  ---------------------------------------------------------------------
+
+
+Optional Enrichment: Threads in Python
+======================================
+
+  Threads are not unique to C and the Pthreads library. Most modern
+  programming environments include some version of them. The prototype
+  version of the worms program was written in Python and can be found in
+  `worms.py' and can be run via
+  ,----
+  | > ./worms.py
+  `----
+  - No territory or step numbers are tracked in the Python version; it
+    runs until Ctrl-c is pressed
+  - This version does not use a memory mapped file instead showing the
+    board on the console.
+  - The `curses' library is used to manipulate the terminal screen which
+    allows for boxes and color to be used but complicates the
+    implementation somewhat.
+  - Python features several types of mutual exclusion locks including
+    one used here that can be re-locked by the same thread without
+    negative effects.
+
+  Time permitting, explore the code of `worms.py' and draw some
+  parallels as to the C code.
+
+  ---------------------------------------------------------------------
+
+  ---------------------------------------------------------------------

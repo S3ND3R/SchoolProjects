@@ -1,15 +1,15 @@
-Eeeellllll
-eeeelll.ll
-eLllllllll
-eelllllll.
-aAaalll...
-aaaaggl...
-aaaaggG...
-aaaagggggg
-aaaagggggg
-aaaaggg.gg
+eeEllLllll
+eeelllllll
+eeelllllll
+eeellaAall
+eeellaaall
+.eeaaaaa.l
+.aaaaaaagg
+.a.aaaaagG
+aa....aagg
+a......agg
 
-E: step  99 ( 0, 0) territory: 11                 
-A: step  99 ( 4, 1) territory: 24                 
-G: step  99 ( 6, 6) territory: 22                 
-L: step  99 ( 2, 1) territory: 31                 
+E: step  99 ( 0, 2) territory: 17                 
+A: step  99 ( 3, 6) territory: 30                 
+G: step  99 ( 7, 9) territory:  8                 
+L: step  99 ( 0, 5) territory: 30                 

@@ -23,7 +23,14 @@ A
   how it is used with this program.
 
   ---------------------------------------------------------------------
-    'worm_pthread' creates
+    'worm_pthread' creates 4 worms that it sets in each corner
+    of the board. The worms try to grab as much territory as possible
+    before they reach their maximum number of steps, 99. They are
+    unable to move into territory that has already been claimed by
+    another worm. They carry out there steps at varying rates of speed.
+
+    The watch command runs a designated command, and at various
+    intervals displays its output to the terminal.
   ---------------------------------------------------------------------
 
 
@@ -36,7 +43,10 @@ B
   portions of the file.
 
   ---------------------------------------------------------------------
-
+    'mmap()' is used to create a virtual memory map of the file
+    'worm_board.txt'. The array is then iterated through, in two
+    nested for loops, and stores the start of each row of the board in
+    board[i].
   ---------------------------------------------------------------------
 
 
@@ -51,7 +61,25 @@ C
   - Describe the function which is used to wait until a thread finishes.
 
   ---------------------------------------------------------------------
+    - pthread_create(pthread_t *thread, const pthread_attr_t *attr,
+                     void *(*start_routine) (void *), void *arg)
+      ~ thread: a pointer to a pthread_t data type. It will store the
+                ID of the newly created thread.
+      ~ attr: a pointer to a pthread_attr_t data type. Its used to
+              set the attributes of the created thread. If set to NULL
+              the attributes will be set to default.
+      ~ start_routine(): pointer to a function. The thread starts its
+                         execution by invoking the 'start_routine()'
+                         process.
+      ~ arg: pointer to the arguments passed to the start routine.
 
+      ~ Return value: on successful creation it returns 0. An error
+                      number is returned in the case where an
+                      error was encountered.
+
+    - pthread_join(pthread_t thread, void **retval)
+      ~ thread:
+      ~ retval: 
   ---------------------------------------------------------------------
 
 

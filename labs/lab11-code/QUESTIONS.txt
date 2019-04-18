@@ -77,9 +77,13 @@ C
                       number is returned in the case where an
                       error was encountered.
 
+
     - pthread_join(pthread_t thread, void **retval)
-      ~ thread:
-      ~ retval: 
+      ~ thread: waits on the specified thread to finish
+      ~ retval: pointer to the return val from the thread if the val
+                not NULL the return value is copied into it.
+
+      ~ Return value: 0 on success and error number on error
   ---------------------------------------------------------------------
 
 
@@ -96,7 +100,23 @@ A
   Describe the basic algorithm that worms follow to do their work.
 
   ---------------------------------------------------------------------
+  'worm_func()' receives a void pointer as an argument.
 
+  Step 1: cast the void pointer to a pointer to a 'wormparam_t' data
+         type, so the variables inside can be accessed. Then use those
+         in the 'wormparam_t' struct to initialize the local variables
+         in 'worm_func()'.
+
+  Step 2: set up the moves array, and the state for the randomization
+
+  Step 3: while the maximum amount of steps have not been completed.
+          Make a move, if it is in bounds, lock that space and check
+          if the space is open or in your territory. If it isn't unlock
+          and try to move again. If it is check that it is new
+          territory, if so take it and increase your territory count.
+          Mark your current territory and move into the new space.
+          Unlock the new territory. Delay for a period and then starts
+          the next step.
   ---------------------------------------------------------------------
 
 
@@ -110,7 +130,20 @@ B
   used to set up this coordination mechanism.
 
   ---------------------------------------------------------------------
+    Before main, an array of pthread_mutex_t is created that matches
+    the spaces on the worm board. The mutex is a lock that allows the
+    thread to block other threads when it wants sole access to a
+    critical area of code. The array of mutexes are initialized in
+    a double for loop in main that calls
+    'pthread_mutex_init(&mutexes[i][j], NULL)'. Later
+    'pthread_mutex_destroy(&mutexes[i][j])' is called to destroy
+    them.
 
+    In 'worm_func()' two calls are used to lock and unlock the
+    mutexes:
+
+    pthread_mutex_lock()
+    pthread_mutex_unlock()
   ---------------------------------------------------------------------
 
 
@@ -126,7 +159,13 @@ C
   entities of different speeds.
 
   ---------------------------------------------------------------------
-
+    At the end of the outer loop of the worm function their is a sleep
+    call. Each worm has a different delay parameter that is used by
+    sleep to determine how long to pause. When different tasks in a
+    process have different speeds, and order of execution can be
+    carefully managed. Splitting tasks up with threads can allow
+    tasks to be run by other threads while another thread handles the
+    slower task.
   ---------------------------------------------------------------------
 
 
@@ -153,7 +192,3 @@ Optional Enrichment: Threads in Python
 
   Time permitting, explore the code of `worms.py' and draw some
   parallels as to the C code.
-
-  ---------------------------------------------------------------------
-
-  ---------------------------------------------------------------------

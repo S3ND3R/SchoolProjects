@@ -1,4 +1,4 @@
-#!/bin/python
+#!/usr/bin/python3
 
 # prototype curses implementation of worms in threads
 
@@ -18,7 +18,7 @@ random.seed()
 # set up the display for ncurses
 screen = curses.initscr()
 worm_box = curses.newwin(height+1, width+1)                               # generate borderd Box
-worm_box.box()                                                            
+worm_box.box()
 screen.refresh()
 worm_box.refresh()
 curses.start_color()
@@ -75,4 +75,3 @@ except KeyboardInterrupt:
     curses.endwin()
     print("Interrupt received... Exiting!")
     os._exit(0)          # sys.exit() does not work for multiple threads
-    

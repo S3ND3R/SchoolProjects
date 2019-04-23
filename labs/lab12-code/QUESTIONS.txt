@@ -158,18 +158,33 @@ B
   --------------------------------------------------------------------
    The change is in the use of condition Variables
    ,----
+
      pthread_cond_wait(&word_queue_not_full, &word_queue_lock);
+     //...
+     pthread_cond_wait(&word_queue_not_empty, &word_queue_lock);
+
    `----
     pthread_cond_wait(pthread_cond_t *restrict cond,
                       pthread_mutex_t *restrict mutex)
       - takes a pointer to a condition
       - takes a pointer to a mutex
-      the call causes the thread to wait until a signal is sent to
+      The call causes the thread to wait until a signal is sent to
       the condition that was passed as a pointer. Upon calling the
       mutex will be unlocked and once the condition recieves the
       signal it will attempt to re-lock the mutex, blocking if another
       thread has already locked the mutex.
-     
+
+      ,----
+
+       pthread_cond_broadcast(&word_queue_not_empty);
+       //...
+       pthread_cond_broadcast(&word_queue_not_full);
+
+      `----
+      int pthread_cond_broadcast(pthread_cond_t *cond)
+      - takes a pointer to a condition
+      The call will unblock all threads that have been blocked on the
+      passed condition variable.
   --------------------------------------------------------------------
 
 
@@ -181,7 +196,13 @@ C
   have on the other thread?
 
   --------------------------------------------------------------------
+  int pthread_cond_broadcast(pthread_cond_t *cond)
+  - takes a pointer to a condition
+  The call will unblock all threads that have been blocked on the
+  passed condition variable.
 
+  The thread that is blocked by the wait condition will stop
+  blocking and try to lock the mutex that was passed to it once again.
   --------------------------------------------------------------------
 
 
@@ -207,3 +228,20 @@ D
   | > time tail -100 english-dict.txt | ./check_spelling_condvar > /dev/null
   | ...
   `----
+
+  --------------------------------------------------------------------
+  ,----
+    > time tail -100 english-dict.txt | ./check_spelling_busy > /dev/null
+    real	0m0.844s
+    user	0m1.623s
+    sys	  0m0.012s
+    > time tail -100 english-dict.txt | ./check_spelling_condvar > /dev/null
+    real	0m0.839s
+    user	0m0.825s
+    sys	  0m0.014s
+  `----
+
+  There is no noticeable difference in the real time for the two
+  versions, but in the user time the busy version takes almost twice
+  as much CPU time. 
+  --------------------------------------------------------------------

@@ -128,12 +128,16 @@ A
     user	0m3.140s
     sys	0m0.000s
   `----
+
+  condition variable version:
   ,----
     real	0m10.929s
     user	0m0.020s
     sys	0m0.001s
   `----
 
+  The condition variable version is able to reduce the user time
+  compared to the busy version.
   --------------------------------------------------------------------
 
 
@@ -152,7 +156,20 @@ B
   them.
 
   --------------------------------------------------------------------
-
+   The change is in the use of condition Variables
+   ,----
+     pthread_cond_wait(&word_queue_not_full, &word_queue_lock);
+   `----
+    pthread_cond_wait(pthread_cond_t *restrict cond,
+                      pthread_mutex_t *restrict mutex)
+      - takes a pointer to a condition
+      - takes a pointer to a mutex
+      the call causes the thread to wait until a signal is sent to
+      the condition that was passed as a pointer. Upon calling the
+      mutex will be unlocked and once the condition recieves the
+      signal it will attempt to re-lock the mutex, blocking if another
+      thread has already locked the mutex.
+     
   --------------------------------------------------------------------
 
 

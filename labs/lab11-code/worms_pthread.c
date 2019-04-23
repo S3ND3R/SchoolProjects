@@ -48,7 +48,7 @@ int main(){
   int board_size = (MAX_ROW) * (MAX_COL+1);      // +1 for newlines
   int print_size = 1 + NWORMS * (PRINT_MAX+1);   // newline + 4 worms each printing a line with a newline
   int file_size = board_size + print_size;       // total file size
-  ftruncate(fd, file_size);                      // set size of file to specified
+  //ftruncate(fd, file_size);                      // set size of file to specified
   char *file_bytes=                              // pointer to memory mapped file contents
     mmap(NULL, file_size, PROT_READ|PROT_WRITE, MAP_SHARED, fd, 0);
 

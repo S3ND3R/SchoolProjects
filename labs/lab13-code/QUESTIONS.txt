@@ -1,0 +1,97 @@
+                           __________________
+
+                            LAB 13 QUESTIONS
+                           __________________
+
+
+- Name: (FILL THIS in)
+- NetID: (THE kauf0095 IN kauf0095@umn.edu)
+
+Answer the questions below according to the lab specification. Write
+your answers directly in this text file and submit it to complete Lab01.
+
+
+Problem 1 `http_get.c'
+======================
+
+  Examine the source code for `http_get.c' and use it to contact a few
+  hosts and files such as those shown at the top of the source.  Answer
+  the following questions.
+
+
+A
+~
+
+  - What is the full name of the that protocol is being employed?
+  - Which port does the server listen on in this protocol?
+
+
+B
+~
+
+  Describe which system calls are used to find an internet address,
+  create a socket, and connect the socket to the found address.
+
+
+C
+~
+
+  In this protocol, which entity, SERVER or CLIENT, sends data first?
+  (Though you don't have access to a server code, this should be obvious
+  from the structure of the client code).
+
+
+D
+~
+
+  Does the protocol work in plain text (human readable) or in binary
+  format (harder for humans to read directly).  Show examples/evidence
+  to support your answer.
+
+
+E
+~
+
+  Many protocols use /headers/ which are meant to convey information
+  between the communication programs about the state of the
+  communication but are NOT data that a program user would be interested
+  in.  Show a few headers which appear in communication and describe
+  what you infer their meaning to be.
+
+
+F
+~
+
+  Attempting to hunt down the actual homepage for the UMN via
+  ,----
+  | ./http_get twin-cities.umn.edu /
+  `----
+  will produce an interesting conundrum: the address to be contacted to
+  retrieve the file uses a DIFFERENT PROTOCOL.
+
+  Identify this other protocol, the port its servers use, and why it
+  would be much more complex to write a client to use it.
+
+
+Problem 2 `http_get_ssl.c'
+==========================
+
+  Examine the source code for `http_get_ssl.c' and use it to contact
+  some of the same hosts that you did with `http_get.c'.  Answer the
+  following questions.
+
+
+A
+~
+
+  Determine what additional measures `http_get_ssl.c' employs to use a
+  secure protocol for communication with a server.  Show the code block
+  that accomplishes this (though no explanation is required).
+
+
+B
+~
+
+  Aside from the code block that is added above to enable secure
+  communication, are there any other large changes between `http_get.c'
+  and `http_get_ssl.c' to implement the secure communication version?

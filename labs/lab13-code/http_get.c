@@ -2,14 +2,14 @@
 // command line to retrieve a file. Does not allow for encrypted
 // connections so cannot access many modern web servers which require
 // HTTPS.
-// 
+//
 // Examples:
 //
 // $> http_get beej.us /                                     # beej's site
 // $> http_get beej.us /guide/bgnet/examples/server.c        # networking example from beej's site
 // $> http_get beej.us /guide/bgnet/examples/client.c        # default server/file for http_get
 // $> http_get english.pku.edu.cn /                          # Peking Univ. Home Page
-// 
+//
 // BELOW links are more troublesome...
 // $> http_get www-users.cs.umn.edu /~kauffman/congrads.txt  # default server/file for http_get_ssl
 // $> http_get www-users.cs.umn.edu /~kauffman/not-there.txt # missing file
@@ -30,8 +30,8 @@
 #include <assert.h>
 #include <arpa/inet.h>
 
-#define PORT "80"                                   // the port client will be connecting to 
-#define MAXDATASIZE 1024                            // max number of bytes we can get at once 
+#define PORT "80"                                   // the port client will be connecting to
+#define MAXDATASIZE 1024                            // max number of bytes we can get at once
 
 void get_address_string(struct addrinfo *addr, char buffer[]);
 
@@ -58,9 +58,9 @@ int main(int argc, char *argv[]) {
   int sockfd = socket(serv_addr->ai_family,          // create a socket with the appropriate params
                       serv_addr->ai_socktype,        // to the server
                       serv_addr->ai_protocol);
-  assert(ret != -1);
+  assert(ret != -1);                                // NOTE: is this supposed to be sockfd?
 
-  ret = connect(sockfd,                             // connect the socket to the server so that 
+  ret = connect(sockfd,                             // connect the socket to the server so that
                 serv_addr->ai_addr,                 // writes will send over the network
                 serv_addr->ai_addrlen);
   assert(ret != -1);
@@ -110,9 +110,9 @@ int main(int argc, char *argv[]) {
 // Fill in the given buffer with a string version of the address from
 // the given addrinfo.  This involves some nasty casting.  addrinfo
 // structs have the member.
-// 
+//
 //  struct sockaddr *ai_addr;	/* Socket address for socket.  */
-// 
+//
 // which may be either a sockaddr_in (IPv4) or sockaddr_in6 (IPv6).
 // The exact type is defined in the sin_family which is supposed be
 // identical to the ai_family field of the addrinfo.

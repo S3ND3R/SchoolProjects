@@ -1,0 +1,238 @@
+                           __________________
+
+                            LAB 13 QUESTIONS
+                           __________________
+
+
+- Name: (FILL THIS in)
+- NetID: (THE kauf0095 IN kauf0095@umn.edu)
+
+Answer the questions below according to the lab specification. Write
+your answers directly in this text file and submit it to complete Lab01.
+
+
+Problem 1 `http_get.c'
+======================
+
+  Examine the source code for `http_get.c' and use it to contact a few
+  hosts and files such as those shown at the top of the source.  Answer
+  the following questions.
+
+
+A
+~
+
+  - What is the full name of the that protocol is being employed?
+  - Which port does the server listen on in this protocol?
+
+
+Solution                                                      :solution:
+--------
+
+  Hyper Text Transfer Protocol in which the server listens on port 80
+
+
+B
+~
+
+  Describe which system calls are used to find an internet address,
+  create a socket, and connect the socket to the found address.
+
+
+Solution                                                      :solution:
+--------
+
+  - getaddrinfo() resolves a symbolic host name to a usable address.
+  - socket() creates a socket which is writeable/readable but not yet
+    connected to another internet address
+  - connect() connects socket to foreign address
+
+
+C
+~
+
+  In this protocol, which entity, SERVER or CLIENT, sends data first?
+  (Though you don't have access to a server code, this should be obvious
+  from the structure of the client code).
+
+
+Solution                                                      :solution:
+--------
+
+  Client writes data first then the server responds to fulfill its
+  request.
+
+
+D
+~
+
+  Does the protocol work in plain text (human readable) or in binary
+  format (harder for humans to read directly).  Show examples/evidence
+  to support your answer.
+
+
+Solution                                                      :solution:
+--------
+
+  Plain text: a request looks like
+  ,----
+  | GET /guide/bgnet/examples/client.c HTTP/1.0
+  | Host: beej.us
+  | Connection: close
+  `----
+  while a response looks like
+  ,----
+  | HTTP/1.1 200 OK
+  | Date: Tue, 23 Apr 2019 22:44:02 GMT
+  | Server: Apache
+  | Last-Modified: Mon, 18 Dec 2017 16:36:49 GMT
+  | ETag: "792-5609ff4f8f58f"
+  | Accept-Ranges: bytes
+  | Content-Length: 1938
+  | Connection: close
+  | Content-Type: text/x-c
+  | 
+  | /*
+  |    client.c -- a stream socket client demo
+  | */
+  | 
+  | #include <stdio.h>
+  | #include <stdlib.h>
+  | #include <unistd.h>
+  | #include <errno.h>
+  | #include <string.h>
+  | #include <netdb.h>
+  | #include <sys/types.h>
+  | #include <netinet/in.h>
+  | #include <sys/socket.h>
+  | 
+  | #include <arpa/inet.h>
+  | 
+  | #define PORT "3490" // the port client will be connecting to 
+  | 
+  | #define MAXDATASIZE 100 // max number of bytes we can get at once 
+  | ...
+  `----
+
+
+E
+~
+
+  Many protocols use /headers/ which are meant to convey information
+  between the communication programs about the state of the
+  communication but are NOT data that a program user would be interested
+  in.  Show a few headers which appear in communication and describe
+  what you infer their meaning to be.
+
+
+Solution                                                      :solution:
+--------
+
+  ,----
+  | GET /guide/bgnet/examples/client.c HTTP/1.0
+  `----
+  Shows requested file and protocol
+
+  ,----
+  | Date: Tue, 23 Apr 2019 22:44:02 GMT
+  `----
+  Duh.
+
+  ,----
+  | Server: Apache
+  `----
+  Web server running
+
+  ,----
+  | Last-Modified: Mon, 18 Dec 2017 16:36:49 GMT
+  `----
+  last time requested file was modified
+
+  ,----
+  | Content-Length: 1938
+  `----
+  Number of bytes in content
+
+  ,----
+  | Content-Type: text/x-c
+  `----
+  Beginning of actual content for user
+
+
+F
+~
+
+  Attempting to hunt down the actual homepage for the UMN via
+  ,----
+  | ./http_get twin-cities.umn.edu /
+  `----
+  will produce an interesting conundrum: the address to be contacted to
+  retrieve the file uses a DIFFERENT PROTOCOL.
+
+  Identify this other protocol, the port its servers use, and why it
+  would be much more complex to write a client to use it.
+
+
+Solution                                                      :solution:
+--------
+
+  HTTPS: the secure version of HTTP. It uses port 443. HTTPS clients
+  must make use of encryption to ensure that communications are secure
+  which is much more involved than the simple HTTP protocol.
+
+
+Problem 2 `http_get_ssl.c'
+==========================
+
+  Examine the source code for `http_get_ssl.c' and use it to contact
+  some of the same hosts that you did with `http_get.c'.  Answer the
+  following questions.
+
+
+A
+~
+
+  Determine what additional measures `http_get_ssl.c' employs to use a
+  secure protocol for communication with a server.  Show the code block
+  that accomplishes this (though no explanation is required).
+
+
+Solution                                                      :solution:
+--------
+
+  The below appears midway through the code.
+
+  ,----
+  |   ////////////////////////////////////////////////////////////////////////////////
+  |   // Initialize and set up a secure connection with the SSL library
+  |   OpenSSL_add_all_algorithms();
+  |   SSL_library_init();
+  |   const SSL_METHOD *method = SSLv23_client_method();
+  |   SSL_CTX *ctx = SSL_CTX_new(method);
+  |   SSL *ssl_connection = SSL_new(ctx); 
+  |   assert(ssl_connection != NULL);
+  |   SSL_set_fd(ssl_connection, sockfd);
+  |   SSL_connect(ssl_connection);
+  |   // Setup of SSL is complete. The variable 'ssl_connection' is used
+  |   // like a file descriptor with SSL_write() / SSL_read(). The data
+  |   // transmitted will be automatically encrypted/decrypted.
+  |   ////////////////////////////////////////////////////////////////////////////////
+  `----
+
+
+B
+~
+
+  Aside from the code block that is added above to enable secure
+  communication, are there any other large changes between `http_get.c'
+  and `http_get_ssl.c' to implement the secure communication version?
+
+
+Solution                                                      :solution:
+--------
+
+  No: the sockets are set up and connected the same way and after the
+  SSL setup, the only other change is the use of SSL_write() and
+  SSL_read() to do the encryption and transfer; these behave identically
+  to standard read() / write(). At the end, the SSL data/library is
+  closed down.

@@ -1,0 +1,229 @@
+                           __________________
+
+                            LAB 11 QUESTIONS
+                           __________________
+
+
+- Name: (FILL THIS in)
+- NetID: (THE kauf095 IN kauf0095@umn.edu)
+
+Answer the questions below according to the lab specification. Write
+your answers directly in this text file and submit it to complete Lab01.
+
+
+PROBLEM 1: The Setup
+====================
+
+A
+~
+
+  Compile and run `worm_pthread.c' using the provided Makefile. Make
+  sure to follow the program prompts.  Describe what you observe. Also
+  do brief research and find out what the Unix command `watch' does and
+  how it is used with this program.
+
+
+Solution                                                      :solution:
+--------
+
+  Compiling and running the program shows the following prompts/output.
+
+  ,----
+  | in separate terminal, use command the 
+  |   > watch -n 0.1 'cat worm_board.txt'
+  | in this directory to observer the worms
+  | press 'enter' to start
+  | 
+  | Running worm threads...
+  | All threads complete.
+  `----
+
+  Following the directions will show a screen that looks like this
+  initially
+  ,----
+  | ..........
+  | ..........
+  | ..........
+  | ..........
+  | ..........
+  | ..........
+  | ..........
+  | ..........
+  | ..........
+  | ..........
+  `----
+
+  but changes to things like this
+  ,----
+  | ee......ll
+  | ee.....ll.
+  | e......lll
+  | ee....llll
+  | .ee..lllll
+  | ..eeElllll
+  | .AeeellLll
+  | .aaeaallll
+  | aaaaaaaGlg
+  | aaaaaaaggg
+  | 
+  | E: step  24 ( 5, 4) territory: 16
+  | A: step  49 ( 6, 1) territory: 19
+  | G: step  20 ( 8, 7) territory:  5
+  | L: step  99 ( 6, 7) territory: 31
+  `----
+  but will change very frequently.
+
+  The `watch' command repeatedly runs a command shows its output. In
+  this case, the command is `cat worm_board.txt' to show the contents of
+  the file which changes as the worms run.
+
+
+B
+~
+
+  Consult the structure of the `main()' function. Determine how changes
+  to the file `worm_board.txt' are made. What special tricks are used to
+  make it relatively easy to change the file AND to change specific
+  portions of the file.
+
+
+Solution                                                      :solution:
+--------
+
+  worm_board.txt is `mmap()''d into the program. It is filled up
+  initially with dots and spaces. During this process, certain file
+  positions are noted in the `board' and `print_rows' variables. These
+  are used later by the worms to make easier changes.
+
+
+C
+~
+
+  Describe the area of code in `main()' which creates threads and awaits
+  them finishing.
+  - Describe the function which is used to start a thread running and
+    its arguments. Consult the manual for documentation on this function
+    if needed.
+  - Describe the function which is used to wait until a thread finishes.
+
+
+Solution                                                      :solution:
+--------
+
+  - pthread_create() is used to create a thread. This function takes 3
+    important arguments: a pointer to a data type `pthread_t' for the
+    parent to track the child, a function for the child to start
+    running, and a pointer to an argument to the child.  It is used in
+    `main()' to create 4 child threads which run the `worm_func()'
+    function.
+  - pthread_join() causes a thread to wait for the completion of another
+    thread and is used in `main()' to wait for the child threads to
+    complete.
+
+
+PROBLEM 2: The Worms
+====================
+
+A
+~
+
+  Examine the `worm_func()' function carefully.  You may wish to
+  consider the specific data passed to these worms which are in the
+  array of `wormparam_t' structs midway through `main()'.
+
+  Describe the basic algorithm that worms follow to do their work.
+
+
+Solution                                                      :solution:
+--------
+
+  - Worms start on a 2D board of chars at an initial position; they
+    write their display character at this position
+  - Each worm iterates NSTEPS times
+  - A move can be up/down/left/right on the 2D board of characters
+  - The worms try random moves among these 4 to place a character on the
+    2D board representing them.
+  - Past areas that the worm occupied are marked with lower case chars
+    while an upper case char is the current row/col position
+  - Worms do not move into other worm territory, only unoccupied '.'
+    spaces or their own areas
+  - On completing all steps, worms exit
+
+
+B
+~
+
+  Describe how worms avoid both claiming the same piece of
+  territory. What system call mechanism is used to ensure that two worms
+  cannot claim the same area of the board? Describe the function calls
+  that are used to accomplish this and what functions in `main()' are
+  used to set up this coordination mechanism.
+
+
+Solution                                                      :solution:
+--------
+
+  Each area of the board is associated with a mutex, a mutual exclusion
+  lock with type `pthread_mutex_t'.  These are used with the calls
+  `pthread_mutex_lock()' to lock a cell in the board. This ensures that
+  only a single worm at a time is examining a given cell and can claim
+  it.  After examining the cell and deciding on a appropriate action
+  (move or not) the worm will unlock the mutex via
+  `pthread_mutex_unlock()' to allow other worms to investigate it.
+
+  Before the worms can use the mutexes, `main()' creates a 2D array of
+  them via `pthread_mutex_init()' and then cleans up the mutexes later
+  with `pthread_mutex_destroy()'.
+
+
+C
+~
+
+  Describe the logic that appears to cause worms to be 'fast' and
+  'slow': how is this artificial speed actually created in the
+  `worm_func()' code.
+
+  While the speed differences of worms is an intended creation of the
+  program, speculate as to what use threads can be when dealing with
+  entities of different speeds.
+
+
+Solution                                                      :solution:
+--------
+
+  Each worm is given a `delay' parameter which is used to sleep the
+  thread. In this case `usleep()' is used to sleep for a specified
+  number of microseconds as the `sleep()' function must take an integer
+  number of seconds.  Sleeping for a short delay makes worms run fast
+  while longer delays make them appear slower.
+
+  In real programs, the threads may represent different computations
+  that take more or less time or they be spun up to deal with external
+  events like I/O from clients that run a unpredictable
+  rates. Individual threads may stall without affecting the execution of
+  other parts of the program.
+
+
+Optional Enrichment: Threads in Python
+======================================
+
+  Threads are not unique to C and the Pthreads library. Most modern
+  programming environments include some version of them. The prototype
+  version of the worms program was written in Python and can be found in
+  `worms.py' and can be run via
+  ,----
+  | > ./worms.py
+  `----
+  - No territory or step numbers are tracked in the Python version; it
+    runs until Ctrl-c is pressed
+  - This version does not use a memory mapped file instead showing the
+    board on the console.
+  - The `curses' library is used to manipulate the terminal screen which
+    allows for boxes and color to be used but complicates the
+    implementation somewhat.
+  - Python features several types of mutual exclusion locks including
+    one used here that can be re-locked by the same thread without
+    negative effects.
+
+  Time permitting, explore the code of `worms.py' and draw some
+  parallels as to the C code.

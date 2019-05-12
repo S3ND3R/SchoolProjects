@@ -36,7 +36,8 @@ B
   Describe which system calls are used to find an internet address,
   create a socket, and connect the socket to the found address.
   ------------------------------------------------------------------------
-    - getaddrinfo() turns a host name into a usable address.
+    - getaddrinfo(): takes a host name and a port and returns a usable
+      address info, which can be used in connect.
     - socket() creates a socket connected to an internet address
     - connect() connects socket to foreign address
   ------------------------------------------------------------------------

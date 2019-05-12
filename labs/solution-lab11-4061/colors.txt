@@ -1,0 +1,1 @@
+\e[0;31mExample\e[0m

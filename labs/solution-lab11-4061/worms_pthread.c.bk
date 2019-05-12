@@ -1,0 +1,167 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include <unistd.h>
+#include <sys/stat.h>
+#include <fcntl.h>
+#include <sys/mman.h>
+#include <string.h>
+#include <time.h>
+#include <ctype.h>
+#include <pthread.h>
+
+// pthread_mutex_t utensils[N_PHILOSOPHERS];   
+
+#define MAX_ROW  10
+#define MAX_COL  10
+  
+// typedef char char_row[MAX_COL+1];
+
+// char_row *board;
+
+char *board[MAX_ROW];         // 2d board array
+char *print_rows[4];          // rows to print stats
+pthread_mutex_t **mutexes;    // 2d array of locks
+
+typedef struct {
+  int id;
+  int row;
+  int col;
+  char display_char;
+  double delay;
+} wormparam_t;
+
+void *worm(void *param);         // Defined after main()
+
+#define PRINT_MAX 32
+
+int main(){
+  int fd = open("worm_board.txt", O_CREAT|O_RDWR, S_IRUSR|S_IWUSR);
+  int board_size = (MAX_ROW) * (MAX_COL+1); // +1 for newlines
+  int print_size = 1 + 4 * (PRINT_MAX+1);
+
+  int size = board_size + print_size;
+  
+  ftruncate(fd, size);              // increase size of file
+
+  char *file_bytes=            // pointer to file contents
+    mmap(NULL, size, PROT_READ|PROT_WRITE,
+         MAP_SHARED, fd, 0);
+  
+  if(board==MAP_FAILED){
+    perror("map failed");
+    exit(1);
+  }
+
+
+  int i,j,ind=0;                // create initial contents of the board
+  for(i=0; i<MAX_ROW; i++){
+    board[i] = &file_bytes[ind];
+    for(j=0; j<MAX_COL; j++){
+      file_bytes[ind] = '.';
+      ind++;
+    }
+    file_bytes[ind] = '\n';
+    ind++;
+  }
+
+  file_bytes[ind++] = '\n';
+
+  for(i=0; i<4; i++){
+    print_rows[i] = &file_bytes[ind];
+    for(j=0; j<PRINT_MAX; j++){
+      file_bytes[ind] = ' ';
+      ind++;
+    }
+    file_bytes[ind] = '\n';
+    ind++;
+  }
+
+  mutexes = malloc(sizeof(pthread_mutex_t *) * MAX_ROW);
+  for(int i=0; i<MAX_ROW; i++){
+    mutexes[i] = malloc(sizeof(pthread_mutex_t) * MAX_COL);
+    for(int j=0; j<MAX_COL; j++){
+      pthread_mutex_init(&mutexes[i][j],NULL);
+    }
+  }
+
+  pthread_t worm_threads[4];
+
+  wormparam_t params[] = {
+    {.id=0, .row=0, .col=0, .display_char='A', .delay=0.5,},
+    {.id=1, .row=MAX_ROW-1, .col=0, .display_char='O', .delay=0.25,},
+    {.id=2, .row=MAX_ROW-1, .col=MAX_COL-1, .display_char='M', .delay=0.75,},
+    {.id=3, .row=0, .col=MAX_COL-1, .display_char='X', .delay=0.1,},
+
+    {.id=-1}
+  };
+
+  printf("starting threads, use command\n");
+  printf("  > watch -n 0.1 'cat worm_board.txt'\n");
+  printf("to observer the worms\n");
+
+  for(i=0; params[i].id != -1; i++){    // parent generates child threads
+    pthread_create(&worm_threads[i],NULL, worm, &params[i]);
+  }
+
+  for(i=0; params[i].id != -1; i++){    // main thread waits on all children to finish
+    pthread_join(worm_threads[i], NULL);
+  }
+
+  for(int i=0; i<MAX_ROW; i++){         // de-allocate the mutexes
+    for(int j=0; j<MAX_COL; j++){
+      pthread_mutex_destroy(&mutexes[i][j]);
+    }
+    free(mutexes[i]);
+  }
+  free(mutexes);
+
+  munmap(board, size);                  // unmap and close file
+  close(fd);
+
+  return 0;
+}
+
+#define NSTEPS 100
+
+void *worm(void *p){
+  wormparam_t *param = (wormparam_t *) p;
+  int id = param->id;
+  int row=param->row, col=param->col;
+  char display_char = param->display_char;
+  int udelay = (int) (1e6 * param->delay);
+
+  board[row][col] = display_char;
+
+  int moves[][2] = {
+    {+1, 0}, {-1, 0},
+    { 0,+1}, { 0,-1},
+  };
+
+  int new_row=-1, new_col=-1;
+    
+  unsigned int state = time(NULL);
+  for(int step=0; step<NSTEPS; step++){
+    while(1){
+      int movei = rand_r(&state) % 4;
+      new_row = row + moves[movei][0];
+      new_col = col + moves[movei][1];
+      if(   new_row >=0 && new_row < MAX_ROW
+         && new_col >=0 && new_col < MAX_COL
+         && pthread_mutex_trylock(&mutexes[new_row][new_col]) == 0)
+      {
+        board[row][col] = tolower(display_char);
+        row = new_row; col = new_col;
+        board[row][col] = display_char;
+        break;
+      }
+    }
+    usleep(udelay);
+
+    int nprint = snprintf(print_rows[id], PRINT_MAX,
+                          "%c: step %3d (%2d,%2d)",
+                          display_char,step,row,col);
+    print_rows[id][nprint] = ' ';
+  }
+
+  return NULL;
+}

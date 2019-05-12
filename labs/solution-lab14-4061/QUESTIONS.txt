@@ -1,0 +1,196 @@
+                       _________________________
+
+                        LAB 14 REVIEW QUESTIONS
+                       _________________________
+
+
+- Name: (FILL THIS in)
+- NetID: (THE kauf0095 IN kauf0095@umn.edu)
+
+Answer the questions below according to the lab specification. Write
+your answers directly in this text file and submit it to complete Lab01.
+
+
+Problem 1: Efficient Thread Coordination
+========================================
+
+  Polly is coding a short routine to determine when the results of a
+  complex computation are complete and then print it. The GUI
+  application she is working is divided into many threads with some
+  global variables to coordinate them. Polly starts with the code below
+  which seems to work to print the results when the computation thread
+  completes them and marks them as ready.
+  ,----
+  | result_t result;
+  | pthread_mutex_t result_lock;
+  | 
+  | void check_and_print() {
+  |   while(1){
+  |     pthread_mutex_lock(&result_lock);
+  |     if(result.ready == 1){
+  |       break;
+  |     }
+  |     pthread_mutex_unlock(&result_lock);
+  |   }
+  |   print_results();
+  |   pthread_mutex_unlock(&result_lock);
+  | }
+  `----
+  However, Polly notices that while her routine is running, the GUI
+  responsiveness slows down tremendously. On profiling her code, she is
+  shocked to see that her a whole CPU Core is utilized at 100% on her
+  `check_and_print()' routine.  Polly is confused as she learned in her
+  OS class that `pthread_mutexes' use efficient blocking operations when
+  contending for locks. She is stumped and requires your help to improve
+  her code.
+
+  1. Polly is correct that `pthread_mutexes' use blocking operations
+     when contending for locks. Explain, though, why her code is still
+     potentially going to use a lot of CPU time.
+
+  2. Describe a thread coordination mechanism that Polly could use to
+     increase the efficiency of her code and get the blocking behavior
+     she is aiming for. Include some modified code to illustrate the new
+     approach.
+
+
+Solution                                                      :solution:
+--------
+
+  1. Polly is correct that `pthread_mutexes' use blocking operations
+     when contending for locks. Explain, though, why her code is still
+     potentially going to use a lot of CPU time.
+
+           Despite locking using blocking semantics, the tight
+           `while()' loop is essentially a "polling" style
+           operation or "busy wait".  This is because on acquiring
+           the lock, the readiness is checked and if not ready,
+           the lock is released. If the lock is still available,
+           it will be re-checked, and re-checked again.  This
+           constant checking can consume a LOT of CPU time that is
+           essentially wasted effort.
+
+  2. Describe a thread coordination mechanism that Polly could use to
+     increase the efficiency of her code and get the blocking behavior
+     she is aiming for. Include some modified code to illustrate the new
+     approach.
+
+           Polly could make use of a *condition variable* so long
+           as the other code which established the `result' also
+           uses this.  Condition variables allow a thread to block
+           and be notified when a condition has changed that may
+           allow it to proceed.  The new code would look like
+           this:
+
+     ,----
+     | result_t result;
+     | pthread_mutex_t   result_lock;  // lock the result
+     | pthread_condvar_t result_ready; // indicates changes to the .ready field
+     | 
+     | void check_and_print() {
+     |   pthread_mutex_lock(&result_lock);
+     |   while(1){
+     |     if(result.ready == 1){
+     |       break;
+     |     }
+     |     pthread_condvar_wait(&result_ready); // block until .result changes
+     |   }
+     |   print_results();
+     |   result.ready = 0;
+     |   pthread_mutex_unlock(&result_lock);
+     |   pthread_condvar_broadcast(&result_ready);
+     | }
+     `----
+
+
+Problem 2: Private Messages
+===========================
+
+  Consider the addition of private messages to the blather
+  server/client.  This feature would allow a user to type a message like
+  ,----
+  | Bruce>> @Lois I know Clark's alter ego
+  `----
+  and have it only delivered to the user specified with the @ symbol,
+  Lois in this case, rather than have the message broadcast to all
+  users. Only on the screen of Lois and Bruce would appear the private
+  message delivery:
+  ,----
+  | [Private: Bruce @ Lois] : I know Clark's alter ego
+  `----
+  All other users would not see this message.
+
+  Discuss the alterations to server and client that would be required to
+  implement this feature. Include in your description.
+  1. Any additional data types or alterations to existing data types
+  2. Any additional FIFOs or protocol alterations
+  3. Changes required for bl_client to implement private messages
+  4. Changes required for bl_server to implement private messages
+
+
+Solution                                                      :solution:
+--------
+
+  1. No new data types would be required but a new BL_PRIV kind for
+     mesg_t would need to be added. With mild modifications, the name
+     field of mesg_t could be used to fit the private message header in
+     it.
+  2. No additonal FIFOs should be needed. Instead, the protocol would
+     just need to be adjusted to account for these new private message
+     kinds which are much like normal messages just delivered to only
+     two users.
+  3. bl_client would need to add code to parse the typed @ symbol, pull
+     out the name, then format a message with the kind BL_PRIV. This
+     would be sent to the server with the intended single recipient in
+     the name field rather than the sending user. The sending client
+     could rely on the fact that the server knows its name. Receiving
+     private messages is identical to normal messages: show the name and
+     message body.
+  4. The server would need to be adjusted to handle BL_PRIV messages. It
+     would format the name field of mesg_t as indicated with the sending
+     user and intended recipient, send the message back to the sender,
+     then search the client list for the user specified, delivering the
+     private message only to that user.
+
+
+Problem 3: Client Socket Setup
+==============================
+
+  Identify the main steps for a C program to set up a "client" socket
+  which will communicate with remote machine which has a known open port
+  and exchange information.
+
+
+Solution                                                      :solution:
+--------
+
+  - Get the binary address of the remote machine with getaddrinfo()
+    which may need to do a network lookup. The listening port of the
+    remote machine must be known.
+  - Create a socket with socket() with appropriate protocol and family.
+  - Connect the sock to the address with a connect() call
+  - Make use of read()/write() or send()/recv() to pass information back
+    and forth with the remote machine through the socket.
+
+
+Problem 4: Server Socket Setup
+==============================
+
+  Identify the main steps for a C program to set up a "server" socket
+  which will listen for connections from remote machine.
+
+
+Solution                                                      :solution:
+--------
+
+  - Get the binary address of the current/host machine with
+    getaddrinfo() including the known port number which will be used to
+    listen
+  - Create a socket with socket() with appropriate protocol and family.
+  - Bind the socket to the host machines address/port with bind()
+  - Set the socket to be in listening mode with the listen() call
+  - Repeatedly accept connections from others with the accept() call
+    which creates one socket per client connection
+  - Make use of read()/write() or send()/recv() to pass information back
+    and forth with the remote machine through the client sockets created
+    by accept()

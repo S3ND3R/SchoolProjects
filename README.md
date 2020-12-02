@@ -1,5 +1,5 @@
-#Projects in Introduction to Operating Systems
-##Assignment 1 
+# Projects in Introduction to Operating Systems
+## Assignment 1 
 
 The goal of this project was to write a simple, command line shell called commando. The shell is less functional than standard shells like bash, but has some properties that distinguish it such as the ability to recall output for any child process. Commando uses a variety of system calls together to accomplish its overall purpose.
 
